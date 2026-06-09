@@ -219,11 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   
-    /* ===============================
-       BUTTON HOVER - SMOOTH RADIAL BG
-    =============================== */
   
-    /* ===============================
+/* ===============================
    BUTTON HOVER - FIXED CORNER BG
 =============================== */
 
@@ -240,4 +237,23 @@ document.querySelectorAll(".button").forEach((button) => {
       button.classList.remove("is-hover");
     });
   });
+
+  const navbar = document.querySelector(".navbar");
+
+  const setNavbarHeight = () => {
+    if (!navbar || !isMobile()) {
+      body.style.setProperty("--navbar-height-mobile", "0px");
+      return;
+    }
+  
+    const navbarHeight = navbar.offsetHeight;
+    body.style.setProperty("--navbar-height-mobile", `${navbarHeight}px`);
+  };
+  
+  setNavbarHeight();
+  
+  window.addEventListener("resize", setNavbarHeight);
+  window.addEventListener("load", setNavbarHeight);
+
+  
   });

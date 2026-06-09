@@ -265,38 +265,52 @@ html.nav-open .navbar--menu-close {
   isolation: isolate;
 
   transition:
-    color .45s ease,
+    color .55s ease,
     transform .35s ease;
 }
 
+/* 
+  Le background part toujours du même coin.
+  Change ces valeurs si tu veux un autre coin :
+  bottom/right = coin bas droite
+*/
 .button-bg {
   position: absolute;
 
-  width: 20px;
-  height: 20px;
+  right: .75rem;
+  bottom: .75rem;
 
-  left: var(--mouse-x, 50%);
-  top: var(--mouse-y, 50%);
+  width: 2rem;
+  height: 2rem;
 
   border-radius: 999rem;
 
   z-index: -1;
   pointer-events: none;
 
-  transform: translate(-50%, -50%) scale(0);
+  transform: scale(1);
+  transform-origin: center;
 
   transition:
-    transform .9s cubic-bezier(.22, 1, .36, 1),
-    left .18s linear,
-    top .18s linear;
+    width 1.05s cubic-bezier(.22, 1, .36, 1),
+    height 1.05s cubic-bezier(.22, 1, .36, 1),
+    right 1.05s cubic-bezier(.22, 1, .36, 1),
+    bottom 1.05s cubic-bezier(.22, 1, .36, 1),
+    transform 1.05s cubic-bezier(.22, 1, .36, 1);
 
-  will-change: transform;
+  will-change: width, height, right, bottom, transform;
 }
 
 .button:hover .button-bg,
 .button.is-hover .button-bg,
 .button:focus-visible .button-bg {
-  transform: translate(-50%, -50%) scale(45);
+  right: 50%;
+  bottom: 50%;
+
+  width: 160%;
+  height: 160%;
+
+  transform: translate(50%, 50%) scale(1);
 }
 
 .button:hover,
@@ -383,3 +397,19 @@ html.nav-open .navbar--menu-close {
     margin: 0 auto;
   }
 }
+
+@media screen and (max-width: 991px) {
+    .navbar {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      right: 0;
+  
+      width: 100%;
+      z-index: 1000;
+    }
+  
+    body {
+      padding-top: var(--navbar-height-mobile, 0px);
+    }
+  }
