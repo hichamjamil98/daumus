@@ -111,67 +111,59 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ===============================
        MOBILE / TABLET HAMBURGER
     =============================== */
-  
-    const menuTrigger = document.querySelector(".navbar-menu-trigger");
-    const menu = document.querySelector(".navbar--menu");
-    const navbarBottom = document.querySelector(".navbar--bottom");
-  
-    const setMobileNavTop = () => {
-      if (!navbarBottom) return;
-  
-      const navRect = navbarBottom.getBoundingClientRect();
-      const navBottomPosition = navRect.bottom;
-  
-      html.style.setProperty("--nav-mobile-top", `${navBottomPosition}px`);
-    };
-  
-    const closeMenu = () => {
-      html.classList.remove("nav-open");
-      body.classList.remove("is-nav-open");
-  
-      if (menu) {
-        menu.classList.remove("is-open");
-      }
-  
-      document.querySelectorAll(".nav--dropdown.is-open").forEach((dropdown) => {
-        const list = dropdown.querySelector(".nav--dropdown-list");
-  
-        dropdown.classList.remove("is-open");
-  
-        if (list && isMobile()) {
-          list.style.height = "0px";
-        }
-      });
-    };
-  
-    const openMenu = () => {
-      setMobileNavTop();
-  
-      html.classList.add("nav-open");
-      body.classList.add("is-nav-open");
-  
-      if (menu) {
-        menu.classList.add("is-open");
-      }
-    };
-  
-    if (menuTrigger && menu) {
-      menuTrigger.addEventListener("click", () => {
-        html.classList.contains("nav-open") ? closeMenu() : openMenu();
-      });
+
+
+const menuTrigger = document.querySelector(".navbar-menu-trigger");
+const menu = document.querySelector(".navbar--menu");
+const navbarBottom = document.querySelector(".navbar--bottom");
+
+const setMobileNavTop = () => {
+  if (!navbarBottom) return;
+
+  const navRect = navbarBottom.getBoundingClientRect();
+  html.style.setProperty("--nav-mobile-top", `${navRect.bottom}px`);
+};
+
+const closeMenu = () => {
+  html.classList.remove("nav-open");
+  body.classList.remove("is-nav-open");
+
+  if (menu) {
+    menu.classList.remove("is-open");
+  }
+};
+
+const openMenu = () => {
+  setMobileNavTop();
+
+  html.classList.add("nav-open");
+  body.classList.add("is-nav-open");
+
+  if (menu) {
+    menu.classList.add("is-open");
+  }
+};
+
+if (menuTrigger && menu) {
+  menuTrigger.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (html.classList.contains("nav-open")) {
+      closeMenu();
+    } else {
+      openMenu();
     }
-  
-    window.addEventListener("resize", () => {
-      setMobileNavTop();
-  
-      if (!isMobile()) {
-        closeMenu();
-  
-        document.querySelectorAll(".nav--dropdown-list").forEach((list) => {
-          list.style.height = "";
-        });
-      }
-    });
+  });
+}
+
+window.addEventListener("resize", () => {
+  setMobileNavTop();
+
+  if (!isMobile()) {
+    closeMenu();
+  }
+});
   
     /* ===============================
        BUTTON HOVER

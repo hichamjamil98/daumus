@@ -328,3 +328,93 @@ html.nav-open .navbar--menu-close {
     margin: 0 auto;
   }
 }
+/* ==========================================================================
+NAVBAR / DROPDOWNS
+   ========================================================================== */
+
+/* Desktop dropdown */
+@media screen and (min-width: 992px) {
+    .nav--dropdown {
+      position: relative;
+    }
+  
+    .nav--dropdown-list {
+      display: flex !important;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 9999;
+  
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+  
+      transform: translateY(0.75rem);
+      transition:
+        opacity 0.25s ease,
+        transform 0.25s ease,
+        visibility 0.25s ease;
+    }
+  
+    .nav--dropdown:hover > .nav--dropdown-list,
+    .nav--dropdown.is-open > .nav--dropdown-list {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      transform: translateY(0) !important;
+    }
+  
+    .nav--dropdown:hover .nav--drop-arrow,
+    .nav--dropdown.is-open .nav--drop-arrow {
+      transform: rotate(180deg);
+    }
+  }
+  
+  /* Tablet / Mobile menu */
+  @media screen and (max-width: 991px) {
+    .navbar--menu {
+      display: flex !important;
+      position: fixed;
+      top: var(--nav-mobile-top, 0px);
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 9999;
+  
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+  
+      transform: translateY(-1rem);
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease,
+        visibility 0.3s ease;
+    }
+  
+    html.nav-open .navbar--menu,
+    .navbar--menu.is-open {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      transform: translateY(0) !important;
+    }
+  
+    .nav--dropdown-list {
+      display: flex !important;
+      position: relative;
+      height: 0;
+      overflow: hidden;
+  
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+  
+      transform: none !important;
+      transition: height 0.3s ease;
+    }
+  
+    .nav--dropdown.is-open > .nav--dropdown-list {
+      height: auto;
+    }
+  }
