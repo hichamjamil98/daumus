@@ -59,7 +59,7 @@ html.has-seen-loading .loading--screen {
 .navbar-menu-trigger {
   cursor: pointer;
   position: relative;
-  z-index: 1100;
+  z-index: 1002;
 }
 
 .navbar--menu-open,
@@ -89,7 +89,7 @@ html.nav-open .navbar--menu-close {
   pointer-events: auto;
 }
 
-/* ---------- Dropdown ---------- */
+/* ---------- Dropdown base ---------- */
 
 .nav--dropdown {
   position: relative;
@@ -104,11 +104,14 @@ html.nav-open .navbar--menu-close {
 
 .nav--drop-arrow {
   transition: transform .3s ease;
+  transform-origin: center;
 }
 
-@media screen and (min-width: 992px) {
+/* ---------- Desktop dropdown ---------- */
 
+@media screen and (min-width: 992px) {
   .nav--dropdown-list {
+    display: flex !important;
     position: absolute;
     top: 100%;
     left: 0;
@@ -124,15 +127,15 @@ html.nav-open .navbar--menu-close {
       transform .25s ease,
       visibility .25s ease;
 
-    z-index: 1200;
+    z-index: 9999;
   }
 
   .nav--dropdown:hover > .nav--dropdown-list,
   .nav--dropdown.is-open > .nav--dropdown-list {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0);
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
   }
 
   .nav--dropdown:hover .nav--drop-arrow,
@@ -141,28 +144,63 @@ html.nav-open .navbar--menu-close {
   }
 }
 
-/* ---------- Mobile Menu ---------- */
+/* ---------- Tablet / Mobile navbar ---------- */
 
 @media screen and (max-width: 991px) {
+  html.nav-open,
+  html.nav-open body {
+    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
+  }
 
-  .navbar-menu-trigger {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .navbar--top {
+    transition:
+      opacity .3s ease,
+      transform .3s ease,
+      visibility .3s ease,
+      height .3s ease,
+      padding .3s ease,
+      margin .3s ease;
+  }
+
+  html.nav-open .navbar--top {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-100%);
+
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+
+    overflow: hidden;
+    pointer-events: none;
   }
 
   .navbar--menu {
-    position: fixed;
+    display: flex !important;
+    position: fixed !important;
 
-    top: var(--nav-mobile-top, 0px);
-    left: 0;
-    right: 0;
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
 
-    width: 100%;
-
-    max-height: calc(100vh - var(--nav-mobile-top, 0px));
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
 
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+
+    z-index: 1001 !important;
 
     opacity: 0;
     visibility: hidden;
@@ -174,31 +212,41 @@ html.nav-open .navbar--menu-close {
       opacity .3s ease,
       transform .3s ease,
       visibility .3s ease;
+  }
 
-    z-index: 999;
+  @supports not (height: 100dvh) {
+    .navbar--menu {
+      height: 100vh !important;
+      max-height: 100vh !important;
+    }
   }
 
   html.nav-open .navbar--menu,
   .navbar--menu.is-open {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0);
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
   }
 
   .nav--dropdown-list {
-    position: relative;
+    display: flex !important;
+    position: static !important;
 
     height: 0;
     overflow: hidden;
 
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 
-    transform: none;
+    transform: none !important;
 
     transition: height .3s ease;
+  }
+
+  .nav--dropdown.is-open > .nav--dropdown-list {
+    height: auto;
   }
 
   .nav--dropdown.is-open .nav--drop-arrow {
@@ -214,7 +262,6 @@ html.nav-open .navbar--menu-close {
 .w-button {
   position: relative;
   overflow: hidden;
-
   isolation: isolate;
 
   transition:
@@ -228,25 +275,28 @@ html.nav-open .navbar--menu-close {
   inset: 0;
 
   z-index: -1;
+  pointer-events: none;
 
-  transform: scaleX(0);
-  transform-origin: left center;
+  border-radius: inherit;
+
+  transform: scale(0);
+  transform-origin: var(--hover-x, 50%) var(--hover-y, 50%);
 
   transition:
-    transform .38s cubic-bezier(.78,0,.4,.99);
-
-  pointer-events: none;
+    transform .45s cubic-bezier(.78, 0, .4, .99);
 }
 
 .button:hover .button-bg,
 .button:focus-visible .button-bg {
-  transform: scaleX(1);
+  transform: scale(1.6);
 }
 
 .button:hover,
+.button:focus-visible,
 .btn--contact:hover,
 .submit--btn:hover,
 .w-button:hover {
+  border-color: currentColor !important;
   transform: translateY(-1px);
 }
 
@@ -304,7 +354,6 @@ html.nav-open .navbar--menu-close {
 }
 
 @keyframes daumus-pulse-bg {
-
   0% {
     transform: scale(1);
     opacity: 0;
@@ -321,181 +370,9 @@ html.nav-open .navbar--menu-close {
 }
 
 @media screen and (max-width: 991px) {
-
   .video--play {
     position: relative;
     inset: auto;
     margin: 0 auto;
   }
 }
-/* ==========================================================================
-NAVBAR / DROPDOWNS
-   ========================================================================== */
-
-/* Desktop dropdown */
-@media screen and (min-width: 992px) {
-    .nav--dropdown {
-      position: relative;
-    }
-  
-    .nav--dropdown-list {
-      display: flex !important;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      z-index: 9999;
-  
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-  
-      transform: translateY(0.75rem);
-      transition:
-        opacity 0.25s ease,
-        transform 0.25s ease,
-        visibility 0.25s ease;
-    }
-  
-    .nav--dropdown:hover > .nav--dropdown-list,
-    .nav--dropdown.is-open > .nav--dropdown-list {
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-      transform: translateY(0) !important;
-    }
-  
-    .nav--dropdown:hover .nav--drop-arrow,
-    .nav--dropdown.is-open .nav--drop-arrow {
-      transform: rotate(180deg);
-    }
-  }
-  
-  /* Tablet / Mobile menu */
-  @media screen and (max-width: 991px) {
-    .navbar--menu {
-      display: flex !important;
-      position: fixed;
-      top: var(--nav-mobile-top, 0px);
-      left: 0;
-      right: 0;
-      width: 100%;
-      z-index: 9999;
-  
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-  
-      transform: translateY(-1rem);
-      transition:
-        opacity 0.3s ease,
-        transform 0.3s ease,
-        visibility 0.3s ease;
-    }
-  
-    html.nav-open .navbar--menu,
-    .navbar--menu.is-open {
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-      transform: translateY(0) !important;
-    }
-  
-    .nav--dropdown-list {
-      display: flex !important;
-      position: relative;
-      height: 0;
-      overflow: hidden;
-  
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-  
-      transform: none !important;
-      transition: height 0.3s ease;
-    }
-  
-    .nav--dropdown.is-open > .nav--dropdown-list {
-      height: auto;
-    }
-  }
-  @media screen and (max-width: 991px) {
-    html.nav-open,
-    html.nav-open body {
-      overflow: hidden;
-      height: 100%;
-      overscroll-behavior: none;
-    }
-  
-    .navbar--top {
-      transition:
-        opacity .3s ease,
-        transform .3s ease,
-        visibility .3s ease;
-    }
-  
-    html.nav-open .navbar--top {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-100%);
-      pointer-events: none;
-    }
-  
-    .navbar--menu {
-      display: flex !important;
-      position: fixed;
-      top: var(--nav-mobile-top, 0px);
-      left: 0;
-      right: 0;
-      bottom: 0;
-  
-      width: 100%;
-      height: calc(100dvh - var(--nav-mobile-top, 0px));
-      max-height: calc(100dvh - var(--nav-mobile-top, 0px));
-  
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-  
-      z-index: 1001;
-  
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-  
-      transform: translateY(-1rem);
-  
-      transition:
-        opacity .3s ease,
-        transform .3s ease,
-        visibility .3s ease;
-    }
-  
-    @supports not (height: 100dvh) {
-      .navbar--menu {
-        height: calc(100vh - var(--nav-mobile-top, 0px));
-        max-height: calc(100vh - var(--nav-mobile-top, 0px));
-      }
-    }
-  
-    html.nav-open .navbar--menu,
-    .navbar--menu.is-open {
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-      transform: translateY(0) !important;
-    }
-  
-    .nav--dropdown-list {
-      display: flex !important;
-      position: static !important;
-      height: 0;
-      overflow: hidden;
-  
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-  
-      transform: none !important;
-      transition: height .3s ease;
-    }
-  }

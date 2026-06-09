@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dropdown.classList.add("is-open");
   
         if (isMobile()) {
-          list.style.height = list.scrollHeight + "px";
+          list.style.height = `${list.scrollHeight}px`;
         }
       };
   
@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isMobile()) return;
   
         e.preventDefault();
+        e.stopPropagation();
   
         const isOpen = dropdown.classList.contains("is-open");
   
@@ -111,97 +112,115 @@ document.addEventListener("DOMContentLoaded", () => {
     /* ===============================
        MOBILE / TABLET HAMBURGER
     =============================== */
-
-const menuTrigger = document.querySelector(".navbar-menu-trigger");
-const menu = document.querySelector(".navbar--menu");
-const navbarBottom = document.querySelector(".navbar--bottom");
-
-let scrollPosition = 0;
-
-const setMobileNavTop = () => {
-  if (!navbarBottom) return;
-
-  const navRect = navbarBottom.getBoundingClientRect();
-  html.style.setProperty("--nav-mobile-top", `${navRect.bottom}px`);
-};
-
-const lockPageScroll = () => {
-  scrollPosition = window.scrollY || document.documentElement.scrollTop;
-
-  body.style.position = "fixed";
-  body.style.top = `-${scrollPosition}px`;
-  body.style.left = "0";
-  body.style.right = "0";
-  body.style.width = "100%";
-
-  html.classList.add("nav-open");
-  body.classList.add("is-nav-open");
-};
-
-const unlockPageScroll = () => {
-  html.classList.remove("nav-open");
-  body.classList.remove("is-nav-open");
-
-  body.style.position = "";
-  body.style.top = "";
-  body.style.left = "";
-  body.style.right = "";
-  body.style.width = "";
-
-  window.scrollTo(0, scrollPosition);
-};
-
-const closeMenu = () => {
-  if (menu) {
-    menu.classList.remove("is-open");
-  }
-
-  document.querySelectorAll(".nav--dropdown.is-open").forEach((dropdown) => {
-    const list = dropdown.querySelector(".nav--dropdown-list");
-
-    dropdown.classList.remove("is-open");
-
-    if (list) {
-      list.style.height = "0px";
+  
+    const menuTrigger = document.querySelector(".navbar-menu-trigger");
+    const menu = document.querySelector(".navbar--menu");
+    const navbarTop = document.querySelector(".navbar--top");
+  
+    let scrollPosition = 0;
+  
+    const getScrollbarWidth = () => {
+      return window.innerWidth - document.documentElement.clientWidth;
+    };
+  
+    const lockPageScroll = () => {
+      scrollPosition = window.scrollY || document.documentElement.scrollTop;
+      const scrollbarWidth = getScrollbarWidth();
+  
+      body.style.position = "fixed";
+      body.style.top = `-${scrollPosition}px`;
+      body.style.left = "0";
+      body.style.right = "0";
+      body.style.width = "100%";
+  
+      if (scrollbarWidth > 0) {
+        body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+  
+      html.classList.add("nav-open");
+      body.classList.add("is-nav-open");
+    };
+  
+    const unlockPageScroll = () => {
+      html.classList.remove("nav-open");
+      body.classList.remove("is-nav-open");
+  
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      body.style.paddingRight = "";
+  
+      window.scrollTo(0, scrollPosition);
+    };
+  
+    const closeAllDropdowns = () => {
+      document.querySelectorAll(".nav--dropdown.is-open").forEach((dropdown) => {
+        const list = dropdown.querySelector(".nav--dropdown-list");
+  
+        dropdown.classList.remove("is-open");
+  
+        if (list && isMobile()) {
+          list.style.height = "0px";
+        }
+      });
+    };
+  
+    const openMenu = () => {
+      if (!isMobile()) return;
+  
+      if (menu) {
+        menu.classList.add("is-open");
+      }
+  
+      lockPageScroll();
+  
+      if (navbarTop) {
+        navbarTop.setAttribute("aria-hidden", "true");
+      }
+    };
+  
+    const closeMenu = () => {
+      if (menu) {
+        menu.classList.remove("is-open");
+      }
+  
+      closeAllDropdowns();
+      unlockPageScroll();
+  
+      if (navbarTop) {
+        navbarTop.removeAttribute("aria-hidden");
+      }
+    };
+  
+    if (menuTrigger && menu) {
+      menuTrigger.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+  
+        html.classList.contains("nav-open") ? closeMenu() : openMenu();
+      });
     }
-  });
-
-  unlockPageScroll();
-};
-
-const openMenu = () => {
-  setMobileNavTop();
-
-  if (menu) {
-    menu.classList.add("is-open");
-  }
-
-  lockPageScroll();
-};
-
-if (menuTrigger && menu) {
-  menuTrigger.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    html.classList.contains("nav-open") ? closeMenu() : openMenu();
-  });
-}
-
-window.addEventListener("resize", () => {
-  setMobileNavTop();
-
-  if (!isMobile()) {
-    closeMenu();
-
-    document.querySelectorAll(".nav--dropdown-list").forEach((list) => {
-      list.style.height = "";
+  
+    window.addEventListener("resize", () => {
+      if (!isMobile()) {
+        closeMenu();
+  
+        document.querySelectorAll(".nav--dropdown-list").forEach((list) => {
+          list.style.height = "";
+        });
+      }
     });
-  }
-});
+  
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && html.classList.contains("nav-open")) {
+        closeMenu();
+      }
+    });
   
     /* ===============================
-       BUTTON HOVER
+       BUTTON HOVER FROM POINTER
     =============================== */
   
     document.querySelectorAll(".button").forEach((button) => {
@@ -209,12 +228,27 @@ window.addEventListener("resize", () => {
   
       if (!bg) return;
   
-      button.addEventListener("mouseenter", () => {
-        bg.style.transform = "scaleX(1)";
+      const setOrigin = (event) => {
+        const rect = button.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+  
+        bg.style.setProperty("--hover-x", `${x}%`);
+        bg.style.setProperty("--hover-y", `${y}%`);
+      };
+  
+      button.addEventListener("mouseenter", (event) => {
+        setOrigin(event);
+        bg.style.transform = "scale(1.6)";
       });
   
-      button.addEventListener("mouseleave", () => {
-        bg.style.transform = "";
+      button.addEventListener("mousemove", (event) => {
+        setOrigin(event);
+      });
+  
+      button.addEventListener("mouseleave", (event) => {
+        setOrigin(event);
+        bg.style.transform = "scale(0)";
       });
     });
   });
