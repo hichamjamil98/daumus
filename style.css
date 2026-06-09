@@ -1,0 +1,405 @@
+/* ========================================================================== 
+   DAUMUS - GLOBAL STYLE.CSS FOR NETLIFY
+   Animations, loading states, navbar/dropdowns, buttons, FAQ, video play
+   ========================================================================== */
+
+/* ---------- Base / rendering ---------- */
+html {
+    font-size: calc((100vw / 1728) * 16);
+  }
+  
+  @media screen and (min-width: 1728px) {
+    html { font-size: 16px; }
+  }
+  
+  @media screen and (min-width: 768px) and (max-width: 991px) {
+    html { font-size: calc((100vw / 768) * 16); }
+  }
+  
+  @media screen and (min-width: 480px) and (max-width: 767px) {
+    html { font-size: calc((100vw / 480) * 16); }
+  }
+  
+  @media screen and (max-width: 479px) {
+    html { font-size: calc((100vw / 375) * 16); }
+  }
+  
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  
+  body.is-nav-open,
+  body.is-loading-locked {
+    overflow: hidden;
+  }
+  
+  /* ---------- Webflow inheritance helpers ---------- */
+  a,
+  .w-input,
+  .w-select,
+  .w-tab-link,
+  .w-nav-link,
+  .w-nav-brand,
+  .w-dropdown-btn,
+  .w-dropdown-toggle,
+  .w-slider-arrow-left,
+  .w-slider-arrow-right,
+  .w-dropdown-link {
+    color: inherit;
+    text-decoration: inherit;
+    font-size: inherit;
+  }
+  
+  *[tabindex]:focus-visible,
+  input[type="file"]:focus-visible,
+  button:focus-visible,
+  a:focus-visible {
+    outline: 0.125rem solid currentColor;
+    outline-offset: 0.125rem;
+  }
+  
+  [class*="container-"] {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .hide { display: none !important; }
+  
+  /* ---------- Loading / initial animation states ---------- */
+  [animation="loading"],
+  [animation="loading-split"],
+  [animation="fade"],
+  [animation="fade-split"],
+  [animation="fade-stagger"] > *,
+  [animation="fade-item"],
+  [animation="fade-text-stagger"] {
+    will-change: transform, opacity;
+  }
+  
+  [animation="loading"]:not([data-loading-lcp]):not(.is-loading-lcp),
+  [animation="loading-split"]:not([data-loading-lcp]):not(.is-loading-lcp) {
+    opacity: 0;
+  }
+  
+  [animation="loading-split"].is-loading-lcp,
+  [animation="loading-split"][data-loading-lcp],
+  [data-loading-lcp] [animation="loading-split"] {
+    opacity: 1;
+  }
+  
+  [animation="loading-stagger"] > * {
+    opacity: 0;
+  }
+  
+  html.has-seen-loading .loading--parent {
+    display: none !important;
+  }
+  
+  /* Fallback: avoid invisible content if JS/GSAP is not loaded */
+  html.no-js [animation],
+  html.no-js [animation="loading-stagger"] > *,
+  html.no-gsap [animation],
+  html.no-gsap [animation="loading-stagger"] > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  @media screen and (max-width: 991px) {
+    [animation="loading"],
+    [animation="loading-split"],
+    [animation="loading-stagger"] > * {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+  
+  /* ---------- Navbar base ---------- */
+  .navbar {
+    position: relative;
+    z-index: 100;
+  }
+  
+  .navbar--brand,
+  .navbar--menu,
+  .nav--contact-wrapper {
+    will-change: transform, opacity;
+  }
+  
+  .navbar-menu-trigger {
+    cursor: pointer;
+    display: none;
+    position: relative;
+    z-index: 110;
+  }
+  
+  .navbar--menu-open,
+  .navbar--menu-close {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  
+  .navbar--menu-close {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.9);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  
+  html.nav-open .navbar--menu-open {
+    opacity: 0;
+    transform: rotate(45deg) scale(0.9);
+    pointer-events: none;
+  }
+  
+  html.nav-open .navbar--menu-close {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+    pointer-events: auto;
+  }
+  
+  /* ---------- Dropdowns desktop + mobile ---------- */
+  .nav--dropdown {
+    position: relative;
+  }
+  
+  .nav--dropdown-trigger {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .nav--drop-arrow {
+    transition: transform 0.3s ease;
+    transform-origin: center;
+  }
+  
+  .nav--dropdown-list {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(0.75rem);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+    z-index: 20;
+  }
+  
+  .nav--dropdown.is-open > .nav--dropdown-list,
+  .nav--dropdown:hover > .nav--dropdown-list {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0rem);
+  }
+  
+  .nav--dropdown.is-open > .nav--dropdown-trigger .nav--drop-arrow,
+  .nav--dropdown:hover > .nav--dropdown-trigger .nav--drop-arrow {
+    transform: rotate(180deg);
+  }
+  
+  .nav--dropdown-trigger.is--current-page {
+    color: inherit;
+  }
+  
+  /* ---------- Tablet / mobile nav ---------- */
+  @media screen and (max-width: 991px) {
+    .navbar-menu-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  
+    .navbar--bottom,
+    .container--nav-bottom {
+      position: relative;
+      z-index: 105;
+    }
+  
+    .navbar--menu {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: var(--nav-mobile-top, 0px);
+      width: 100%;
+      max-height: calc(100vh - var(--nav-mobile-top, 0px));
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-1rem);
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      z-index: 99;
+    }
+  
+    html.nav-open .navbar--menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0rem);
+    }
+  
+    .nav--dropdown-list {
+      position: relative;
+      height: 0;
+      overflow: hidden;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: none;
+      transition: height 0.3s ease;
+    }
+  
+    .nav--dropdown:hover > .nav--dropdown-list {
+      height: 0;
+    }
+  
+    .nav--dropdown:hover > .nav--dropdown-trigger .nav--drop-arrow {
+      transform: none;
+    }
+  
+    .nav--dropdown.is-open > .nav--dropdown-trigger .nav--drop-arrow {
+      transform: rotate(180deg);
+    }
+  }
+  
+  /* ---------- Buttons hover background ---------- */
+  .button,
+  .btn--contact,
+  .submit--btn,
+  .w-button {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition: color 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+  }
+  
+  .button-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.38s cubic-bezier(0.78, 0, 0.4, 0.99);
+    pointer-events: none;
+  }
+  
+  .button:hover .button-bg,
+  .button:focus-visible .button-bg {
+    transform: scaleX(1);
+  }
+  
+  .button:hover,
+  .btn--contact:hover,
+  .submit--btn:hover,
+  .w-button:hover {
+    transform: translateY(-0.0625rem);
+  }
+  
+  .btn--contact::before,
+  .submit--btn::before,
+  .w-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: currentColor;
+    opacity: 0.1;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.38s cubic-bezier(0.78, 0, 0.4, 0.99);
+  }
+  
+  .btn--contact:hover::before,
+  .submit--btn:hover::before,
+  .w-button:hover::before {
+    transform: scaleX(1);
+  }
+  
+  /* ---------- FAQ accordion ---------- */
+  .faq--response,
+  .faq-answer {
+    height: 0;
+    overflow: hidden;
+  }
+  
+  .faq--item,
+  .faq-question,
+  .faq--question {
+    cursor: pointer;
+  }
+  
+  /* ---------- Video play pulse ---------- */
+  .video--play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 5rem;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #EC7B13;
+    color: #fff;
+    z-index: 10;
+  }
+  
+  .video--play svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .video--play::before,
+  .video--play::after {
+    content: "";
+    position: absolute;
+    inset: -0.75rem;
+    border-radius: 50%;
+    background: rgba(236, 123, 19, 0.4);
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .video--play::before { animation: daumus-pulse-bg 1.8s ease-out infinite; }
+  .video--play::after { animation: daumus-pulse-bg 1.8s ease-out 0.9s infinite; }
+  
+  @keyframes daumus-pulse-bg {
+    0% { transform: scale(1); opacity: 0; }
+    15% { opacity: 0.7; }
+    100% { transform: scale(1.7); opacity: 0; }
+  }
+  
+  @media screen and (max-width: 991px) {
+    .video--play {
+      position: relative;
+      inset: auto;
+      margin: 0 auto;
+    }
+  }
+  
+  /* ---------- Swiper helpers ---------- */
+  .swiper,
+  .swiper-wrapper {
+    box-sizing: border-box;
+  }
+  
+  .swiper-button-disabled,
+  .swiper-btn-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  
+  /* ---------- Utility ---------- */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  
