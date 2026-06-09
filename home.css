@@ -1,0 +1,104 @@
+/* ==========================================================================
+   HOME - SWIPER / FOOTER / VIDEO
+   ========================================================================== */
+
+/* ---------- Footer Inline Links ---------- */
+
+.flex--wrap {
+    display: block;
+    line-height: 1.6;
+  }
+  
+  .footer--link,
+  .footer--link .text-block,
+  .flex--wrap .text-size-14 {
+    display: inline;
+  }
+  
+  .footer--link .text-block {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+  
+  .flex--wrap .text-size-14 {
+    margin-right: 0.25rem;
+  }
+  
+  
+  /* ---------- Video Play Button ---------- */
+  
+  .video--play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+  
+    width: 5rem;
+    height: 5rem;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    border-radius: 50%;
+    background: #EC7B13;
+    color: #fff;
+  
+    z-index: 10;
+  }
+  
+  .video--play svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .video--play::before,
+  .video--play::after {
+    content: "";
+    position: absolute;
+    inset: -0.75rem;
+  
+    border-radius: 50%;
+    background: rgba(236, 123, 19, 0.4);
+  
+    pointer-events: none;
+    z-index: -1;
+  }
+  
+  .video--play::before {
+    animation: pulse-bg 1.8s ease-out infinite;
+  }
+  
+  .video--play::after {
+    animation: pulse-bg 1.8s ease-out 0.9s infinite;
+  }
+  
+  @keyframes pulse-bg {
+    0% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  
+    15% {
+      opacity: 0.7;
+    }
+  
+    100% {
+      transform: scale(1.7);
+      opacity: 0;
+    }
+  }
+  
+  /* Tablet + Mobile */
+  @media screen and (max-width: 991px) {
+    .video--play {
+      position: relative;
+      inset: auto;
+      margin: 0 auto;
+      left: auto;
+      right: auto;
+      top: auto;
+      bottom: auto;
+    }
+  }
