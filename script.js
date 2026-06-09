@@ -259,3 +259,11 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   });
+
+/* ===============================
+   FOOTER YEAR
+=============================== */
+
+document.querySelectorAll(".footer-year").forEach((el) => {
+    el.textContent = new Date().getFullYear();
+  });
