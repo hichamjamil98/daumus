@@ -223,32 +223,21 @@ document.addEventListener("DOMContentLoaded", () => {
        BUTTON HOVER - SMOOTH RADIAL BG
     =============================== */
   
-    document.querySelectorAll(".button").forEach((button) => {
-      const bg = button.querySelector(".button-bg");
+    /* ===============================
+   BUTTON HOVER - FIXED CORNER BG
+=============================== */
+
+document.querySelectorAll(".button").forEach((button) => {
+    const bg = button.querySelector(".button-bg");
   
-      if (!bg) return;
+    if (!bg) return;
   
-      const setPosition = (event) => {
-        const rect = button.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-  
-        bg.style.setProperty("--mouse-x", `${x}px`);
-        bg.style.setProperty("--mouse-y", `${y}px`);
-      };
-  
-      button.addEventListener("mouseenter", (event) => {
-        setPosition(event);
-        button.classList.add("is-hover");
-      });
-  
-      button.addEventListener("mousemove", (event) => {
-        setPosition(event);
-      });
-  
-      button.addEventListener("mouseleave", (event) => {
-        setPosition(event);
-        button.classList.remove("is-hover");
-      });
+    button.addEventListener("mouseenter", () => {
+      button.classList.add("is-hover");
     });
+  
+    button.addEventListener("mouseleave", () => {
+      button.classList.remove("is-hover");
+    });
+  });
   });
