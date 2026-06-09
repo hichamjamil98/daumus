@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   
     /* ===============================
-       BUTTON HOVER FROM POINTER
+       BUTTON HOVER - SMOOTH RADIAL BG
     =============================== */
   
     document.querySelectorAll(".button").forEach((button) => {
@@ -228,27 +228,27 @@ document.addEventListener("DOMContentLoaded", () => {
   
       if (!bg) return;
   
-      const setOrigin = (event) => {
+      const setPosition = (event) => {
         const rect = button.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) / rect.width) * 100;
-        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
   
-        bg.style.setProperty("--hover-x", `${x}%`);
-        bg.style.setProperty("--hover-y", `${y}%`);
+        bg.style.setProperty("--mouse-x", `${x}px`);
+        bg.style.setProperty("--mouse-y", `${y}px`);
       };
   
       button.addEventListener("mouseenter", (event) => {
-        setOrigin(event);
-        bg.style.transform = "scale(1.6)";
+        setPosition(event);
+        button.classList.add("is-hover");
       });
   
       button.addEventListener("mousemove", (event) => {
-        setOrigin(event);
+        setPosition(event);
       });
   
       button.addEventListener("mouseleave", (event) => {
-        setOrigin(event);
-        bg.style.transform = "scale(0)";
+        setPosition(event);
+        button.classList.remove("is-hover");
       });
     });
   });
