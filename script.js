@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     staggerWrappers.forEach((el) => observer.observe(el));
   
     /* ===============================
-       NAVBAR HEIGHT FOR FIXED MOBILE
+       NAVBAR HEIGHT MOBILE
     =============================== */
   
     const navbar = document.querySelector(".navbar");
@@ -71,8 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
   
-      const navbarHeight = navbar.offsetHeight;
-      body.style.setProperty("--navbar-height-mobile", `${navbarHeight}px`);
+      body.style.setProperty("--navbar-height-mobile", `${navbar.offsetHeight}px`);
     };
   
     setNavbarHeight();
@@ -243,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   
     /* ===============================
-       BUTTON HOVER - FIXED CORNER BG
+       BUTTON HOVER
     =============================== */
   
     document.querySelectorAll(".button").forEach((button) => {
