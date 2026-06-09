@@ -60,6 +60,27 @@ document.addEventListener("DOMContentLoaded", () => {
     staggerWrappers.forEach((el) => observer.observe(el));
   
     /* ===============================
+       NAVBAR HEIGHT FOR FIXED MOBILE
+    =============================== */
+  
+    const navbar = document.querySelector(".navbar");
+  
+    const setNavbarHeight = () => {
+      if (!navbar || !isMobile()) {
+        body.style.setProperty("--navbar-height-mobile", "0px");
+        return;
+      }
+  
+      const navbarHeight = navbar.offsetHeight;
+      body.style.setProperty("--navbar-height-mobile", `${navbarHeight}px`);
+    };
+  
+    setNavbarHeight();
+  
+    window.addEventListener("resize", setNavbarHeight);
+    window.addEventListener("load", setNavbarHeight);
+  
+    /* ===============================
        NAVBAR DROPDOWNS
     =============================== */
   
@@ -204,6 +225,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     window.addEventListener("resize", () => {
+      setNavbarHeight();
+  
       if (!isMobile()) {
         closeMenu();
   
@@ -219,41 +242,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   
+    /* ===============================
+       BUTTON HOVER - FIXED CORNER BG
+    =============================== */
   
-/* ===============================
-   BUTTON HOVER - FIXED CORNER BG
-=============================== */
-
-document.querySelectorAll(".button").forEach((button) => {
-    const bg = button.querySelector(".button-bg");
+    document.querySelectorAll(".button").forEach((button) => {
+      const bg = button.querySelector(".button-bg");
   
-    if (!bg) return;
+      if (!bg) return;
   
-    button.addEventListener("mouseenter", () => {
-      button.classList.add("is-hover");
+      button.addEventListener("mouseenter", () => {
+        button.classList.add("is-hover");
+      });
+  
+      button.addEventListener("mouseleave", () => {
+        button.classList.remove("is-hover");
+      });
     });
-  
-    button.addEventListener("mouseleave", () => {
-      button.classList.remove("is-hover");
-    });
-  });
-
-  const navbar = document.querySelector(".navbar");
-
-  const setNavbarHeight = () => {
-    if (!navbar || !isMobile()) {
-      body.style.setProperty("--navbar-height-mobile", "0px");
-      return;
-    }
-  
-    const navbarHeight = navbar.offsetHeight;
-    body.style.setProperty("--navbar-height-mobile", `${navbarHeight}px`);
-  };
-  
-  setNavbarHeight();
-  
-  window.addEventListener("resize", setNavbarHeight);
-  window.addEventListener("load", setNavbarHeight);
-
-  
   });
