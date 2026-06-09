@@ -1,207 +1,193 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-    // ==================================================
-    // LOADING
-    // ==================================================
+    const html = document.documentElement;
+    const body = document.body;
+    const isMobile = () => window.innerWidth <= 991;
   
-    const loadingScreen = document.querySelector(".loading--screen");
+    /* ===============================
+       ANIMATIONS
+    =============================== */
   
-    if (loadingScreen) {
+    const animationSelector = [
+      '[animation="loading"]',
+      '[animation="loading-split"]',
+      '[animation="fade"]',
+      '[animation="fade-split"]',
+      '[animation="fade-text-stagger"]',
+      '[animation="fade-item"]'
+    ].join(",");
   
-      const alreadySeen = sessionStorage.getItem("loading-seen");
+    const staggerSelector = [
+      '[animation="fade-stagger"]',
+      '[animation="loading-stagger"]'
+    ].join(",");
   
-      if (!alreadySeen) {
+    const animatedItems = document.querySelectorAll(animationSelector);
+    const staggerWrappers = document.querySelectorAll(staggerSelector);
   
-        document.body.style.overflow = "hidden";
+    const showElement = (el) => {
+      el.classList.add("is-visible");
+    };
   
+    const showStagger = (wrapper) => {
+      [...wrapper.children].forEach((child, index) => {
         setTimeout(() => {
-  
-          loadingScreen.classList.add("is-hidden");
-  
-          document.body.style.overflow = "";
-  
-          sessionStorage.setItem("loading-seen", "true");
-  
-        }, 1800);
-  
-      } else {
-  
-        loadingScreen.style.display = "none";
-  
-      }
-    }
-  
-    // ==================================================
-    // FADE IN ELEMENTS
-    // ==================================================
-  
-    const fadeElements = document.querySelectorAll(`
-      [animation="fade"],
-      [animation="loading"],
-      [animation="fade-split"]
-    `);
-  
-    const fadeObserver = new IntersectionObserver((entries) => {
-  
-      entries.forEach(entry => {
-  
-        if (entry.isIntersecting) {
-  
-          entry.target.classList.add("is-visible");
-  
-          fadeObserver.unobserve(entry.target);
-  
-        }
-  
+          child.classList.add("is-visible");
+        }, index * 100);
       });
+    };
   
-    }, {
-      threshold: 0.15
-    });
-  
-    fadeElements.forEach(el => fadeObserver.observe(el));
-  
-    // ==================================================
-    // STAGGER ITEMS
-    // ==================================================
-  
-    const staggerWrappers = document.querySelectorAll(`
-      [animation="fade-stagger"],
-      [animation="loading-stagger"]
-    `);
-  
-    staggerWrappers.forEach(wrapper => {
-  
-      const items = [...wrapper.children];
-  
-      const observer = new IntersectionObserver(entries => {
-  
-        entries.forEach(entry => {
-  
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
   
-          items.forEach((item, index) => {
+          if (entry.target.matches(staggerSelector)) {
+            showStagger(entry.target);
+          } else {
+            showElement(entry.target);
+          }
   
-            setTimeout(() => {
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -5% 0px"
+      }
+    );
   
-              item.classList.add("is-visible");
+    animatedItems.forEach((el) => observer.observe(el));
+    staggerWrappers.forEach((el) => observer.observe(el));
   
-            }, index * 120);
+    /* ===============================
+       NAVBAR DROPDOWNS
+    =============================== */
   
-          });
+    document.querySelectorAll(".nav--dropdown").forEach((dropdown) => {
+      const trigger = dropdown.querySelector(".nav--dropdown-trigger");
+      const list = dropdown.querySelector(".nav--dropdown-list");
   
-          observer.unobserve(wrapper);
+      if (!trigger || !list) return;
   
+      const openDropdown = () => {
+        dropdown.classList.add("is-open");
+  
+        if (isMobile()) {
+          list.style.height = list.scrollHeight + "px";
+        }
+      };
+  
+      const closeDropdown = () => {
+        dropdown.classList.remove("is-open");
+  
+        if (isMobile()) {
+          list.style.height = "0px";
+        }
+      };
+  
+      trigger.addEventListener("click", (e) => {
+        if (!isMobile()) return;
+  
+        e.preventDefault();
+  
+        const isOpen = dropdown.classList.contains("is-open");
+  
+        document.querySelectorAll(".nav--dropdown.is-open").forEach((item) => {
+          if (item === dropdown) return;
+  
+          const itemList = item.querySelector(".nav--dropdown-list");
+  
+          item.classList.remove("is-open");
+  
+          if (itemList) {
+            itemList.style.height = "0px";
+          }
         });
   
-      }, {
-        threshold: 0.1
+        isOpen ? closeDropdown() : openDropdown();
       });
-  
-      observer.observe(wrapper);
-  
     });
   
-    // ==================================================
-    // NAVBAR MOBILE
-    // ==================================================
+    /* ===============================
+       MOBILE / TABLET HAMBURGER
+    =============================== */
   
     const menuTrigger = document.querySelector(".navbar-menu-trigger");
-    const navbarMenu = document.querySelector(".navbar--menu");
+    const menu = document.querySelector(".navbar--menu");
+    const navbarBottom = document.querySelector(".navbar--bottom");
   
-    if (menuTrigger && navbarMenu) {
+    const setMobileNavTop = () => {
+      if (!navbarBottom) return;
   
-      menuTrigger.addEventListener("click", () => {
+      const navRect = navbarBottom.getBoundingClientRect();
+      const navBottomPosition = navRect.bottom;
   
-        const isOpen = navbarMenu.classList.toggle("is-open");
+      html.style.setProperty("--nav-mobile-top", `${navBottomPosition}px`);
+    };
   
-        menuTrigger.classList.toggle("is-open");
+    const closeMenu = () => {
+      html.classList.remove("nav-open");
+      body.classList.remove("is-nav-open");
   
-        document.body.style.overflow = isOpen ? "hidden" : "";
+      if (menu) {
+        menu.classList.remove("is-open");
+      }
   
+      document.querySelectorAll(".nav--dropdown.is-open").forEach((dropdown) => {
+        const list = dropdown.querySelector(".nav--dropdown-list");
+  
+        dropdown.classList.remove("is-open");
+  
+        if (list && isMobile()) {
+          list.style.height = "0px";
+        }
       });
+    };
   
+    const openMenu = () => {
+      setMobileNavTop();
+  
+      html.classList.add("nav-open");
+      body.classList.add("is-nav-open");
+  
+      if (menu) {
+        menu.classList.add("is-open");
+      }
+    };
+  
+    if (menuTrigger && menu) {
+      menuTrigger.addEventListener("click", () => {
+        html.classList.contains("nav-open") ? closeMenu() : openMenu();
+      });
     }
   
-    // ==================================================
-    // NAVBAR DROPDOWNS
-    // ==================================================
+    window.addEventListener("resize", () => {
+      setMobileNavTop();
   
-    document.querySelectorAll(".nav--dropdown").forEach(dropdown => {
+      if (!isMobile()) {
+        closeMenu();
   
-      const trigger = dropdown.querySelector(".nav--dropdown-trigger");
-  
-      const content = dropdown.querySelector(".nav--dropdown-list");
-  
-      const arrow = dropdown.querySelector(".nav--drop-arrow");
-  
-      if (!trigger || !content) return;
-  
-      trigger.addEventListener("click", () => {
-  
-        const isOpen = dropdown.classList.toggle("is-open");
-  
-        if (window.innerWidth <= 991) {
-  
-          content.style.maxHeight = isOpen
-            ? content.scrollHeight + "px"
-            : "0px";
-  
-        }
-  
-        if (arrow) {
-          arrow.style.transform =
-            isOpen
-              ? "rotate(180deg)"
-              : "rotate(0deg)";
-        }
-  
-      });
-  
+        document.querySelectorAll(".nav--dropdown-list").forEach((list) => {
+          list.style.height = "";
+        });
+      }
     });
   
-    // ==================================================
-    // FAQ
-    // ==================================================
+    /* ===============================
+       BUTTON HOVER
+    =============================== */
   
-    document.querySelectorAll(".faq--item").forEach(item => {
-  
-      const answer = item.querySelector(".faq--response");
-  
-      if (!answer) return;
-  
-      answer.style.maxHeight = "0px";
-  
-      item.addEventListener("click", () => {
-  
-        const isOpen = item.classList.toggle("open");
-  
-        answer.style.maxHeight = isOpen
-          ? answer.scrollHeight + "px"
-          : "0px";
-  
-      });
-  
-    });
-  
-    // ==================================================
-    // BUTTON HOVER
-    // ==================================================
-  
-    document.querySelectorAll(".button").forEach(button => {
-  
+    document.querySelectorAll(".button").forEach((button) => {
       const bg = button.querySelector(".button-bg");
   
       if (!bg) return;
   
       button.addEventListener("mouseenter", () => {
-        bg.classList.add("is-hover");
+        bg.style.transform = "scaleX(1)";
       });
   
       button.addEventListener("mouseleave", () => {
-        bg.classList.remove("is-hover");
+        bg.style.transform = "";
       });
-  
     });
-  
   });
