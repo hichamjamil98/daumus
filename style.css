@@ -418,3 +418,84 @@ NAVBAR / DROPDOWNS
       height: auto;
     }
   }
+  @media screen and (max-width: 991px) {
+    html.nav-open,
+    html.nav-open body {
+      overflow: hidden;
+      height: 100%;
+      overscroll-behavior: none;
+    }
+  
+    .navbar--top {
+      transition:
+        opacity .3s ease,
+        transform .3s ease,
+        visibility .3s ease;
+    }
+  
+    html.nav-open .navbar--top {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-100%);
+      pointer-events: none;
+    }
+  
+    .navbar--menu {
+      display: flex !important;
+      position: fixed;
+      top: var(--nav-mobile-top, 0px);
+      left: 0;
+      right: 0;
+      bottom: 0;
+  
+      width: 100%;
+      height: calc(100dvh - var(--nav-mobile-top, 0px));
+      max-height: calc(100dvh - var(--nav-mobile-top, 0px));
+  
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+  
+      z-index: 1001;
+  
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+  
+      transform: translateY(-1rem);
+  
+      transition:
+        opacity .3s ease,
+        transform .3s ease,
+        visibility .3s ease;
+    }
+  
+    @supports not (height: 100dvh) {
+      .navbar--menu {
+        height: calc(100vh - var(--nav-mobile-top, 0px));
+        max-height: calc(100vh - var(--nav-mobile-top, 0px));
+      }
+    }
+  
+    html.nav-open .navbar--menu,
+    .navbar--menu.is-open {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      transform: translateY(0) !important;
+    }
+  
+    .nav--dropdown-list {
+      display: flex !important;
+      position: static !important;
+      height: 0;
+      overflow: hidden;
+  
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+  
+      transform: none !important;
+      transition: height .3s ease;
+    }
+  }

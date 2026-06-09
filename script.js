@@ -112,10 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
        MOBILE / TABLET HAMBURGER
     =============================== */
 
-
 const menuTrigger = document.querySelector(".navbar-menu-trigger");
 const menu = document.querySelector(".navbar--menu");
 const navbarBottom = document.querySelector(".navbar--bottom");
+
+let scrollPosition = 0;
 
 const setMobileNavTop = () => {
   if (!navbarBottom) return;
@@ -124,24 +125,58 @@ const setMobileNavTop = () => {
   html.style.setProperty("--nav-mobile-top", `${navRect.bottom}px`);
 };
 
-const closeMenu = () => {
+const lockPageScroll = () => {
+  scrollPosition = window.scrollY || document.documentElement.scrollTop;
+
+  body.style.position = "fixed";
+  body.style.top = `-${scrollPosition}px`;
+  body.style.left = "0";
+  body.style.right = "0";
+  body.style.width = "100%";
+
+  html.classList.add("nav-open");
+  body.classList.add("is-nav-open");
+};
+
+const unlockPageScroll = () => {
   html.classList.remove("nav-open");
   body.classList.remove("is-nav-open");
 
+  body.style.position = "";
+  body.style.top = "";
+  body.style.left = "";
+  body.style.right = "";
+  body.style.width = "";
+
+  window.scrollTo(0, scrollPosition);
+};
+
+const closeMenu = () => {
   if (menu) {
     menu.classList.remove("is-open");
   }
+
+  document.querySelectorAll(".nav--dropdown.is-open").forEach((dropdown) => {
+    const list = dropdown.querySelector(".nav--dropdown-list");
+
+    dropdown.classList.remove("is-open");
+
+    if (list) {
+      list.style.height = "0px";
+    }
+  });
+
+  unlockPageScroll();
 };
 
 const openMenu = () => {
   setMobileNavTop();
 
-  html.classList.add("nav-open");
-  body.classList.add("is-nav-open");
-
   if (menu) {
     menu.classList.add("is-open");
   }
+
+  lockPageScroll();
 };
 
 if (menuTrigger && menu) {
@@ -149,11 +184,7 @@ if (menuTrigger && menu) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (html.classList.contains("nav-open")) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
+    html.classList.contains("nav-open") ? closeMenu() : openMenu();
   });
 }
 
@@ -162,6 +193,10 @@ window.addEventListener("resize", () => {
 
   if (!isMobile()) {
     closeMenu();
+
+    document.querySelectorAll(".nav--dropdown-list").forEach((list) => {
+      list.style.height = "";
+    });
   }
 });
   
