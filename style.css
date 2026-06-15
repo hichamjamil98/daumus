@@ -453,9 +453,9 @@ html.nav-open .navbar--menu-close {
     transform .45s cubic-bezier(.22, 1, .36, 1);
 }
 
+/* Underline uniquement pour les liens texte */
 .footer--link::after,
-.contact--link::after,
-.social--link::after {
+.contact--link::after {
   content: "";
   position: absolute;
   left: 0;
@@ -481,10 +481,8 @@ html.nav-open .navbar--menu-close {
 
 .footer--link:hover::after,
 .contact--link:hover::after,
-.social--link:hover::after,
 .footer--link:focus-visible::after,
-.contact--link:focus-visible::after,
-.social--link:focus-visible::after {
+.contact--link:focus-visible::after {
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -495,8 +493,10 @@ html.nav-open .navbar--menu-close {
   outline: none;
 }
 
+/* Social icon animation uniquement */
 .social--link svg {
-  transition: transform .55s cubic-bezier(.22, 1, .36, 1);
+  transition:
+    transform .55s cubic-bezier(.22, 1, .36, 1);
 }
 
 .social--link:hover svg,
