@@ -1,104 +1,214 @@
 /* ==========================================================================
-   HOME - SWIPER / FOOTER / VIDEO
+   HOME - SWIPER / FOOTER / VIDEO / FORM
+   ========================================================================== */
+
+
+/* ==========================================================================
+   FOOTER
    ========================================================================== */
 
 /* ---------- Footer Inline Links ---------- */
 
 .flex--wrap {
-    display: block;
-    line-height: 1.6;
+  display: block;
+  line-height: 1.6;
+}
+
+.footer--link,
+.footer--link .text-block,
+.flex--wrap .text-size-14 {
+  display: inline;
+}
+
+.footer--link .text-block {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.flex--wrap .text-size-14 {
+  margin-right: 0.25rem;
+}
+
+
+/* ==========================================================================
+   VIDEO
+   ========================================================================== */
+
+/* ---------- Video Play Button ---------- */
+
+.video--play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+
+  width: 5rem;
+  height: 5rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #EC7B13;
+  color: #fff;
+
+  z-index: 10;
+}
+
+.video--play svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.video--play::before,
+.video--play::after {
+  content: "";
+  position: absolute;
+  inset: -0.75rem;
+
+  border-radius: 50%;
+  background: rgba(236, 123, 19, 0.4);
+
+  pointer-events: none;
+  z-index: -1;
+}
+
+.video--play::before {
+  animation: pulse-bg 1.8s ease-out infinite;
+}
+
+.video--play::after {
+  animation: pulse-bg 1.8s ease-out 0.9s infinite;
+}
+
+@keyframes pulse-bg {
+  0% {
+    transform: scale(1);
+    opacity: 0;
   }
-  
-  .footer--link,
-  .footer--link .text-block,
-  .flex--wrap .text-size-14 {
-    display: inline;
+
+  15% {
+    opacity: 0.7;
   }
-  
-  .footer--link .text-block {
-    white-space: normal;
-    overflow-wrap: break-word;
+
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
   }
-  
-  .flex--wrap .text-size-14 {
-    margin-right: 0.25rem;
-  }
-  
-  
-  /* ---------- Video Play Button ---------- */
-  
+}
+
+/* Tablet + Mobile */
+@media screen and (max-width: 991px) {
   .video--play {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-  
-    width: 5rem;
-    height: 5rem;
-  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    border-radius: 50%;
-    background: #EC7B13;
-    color: #fff;
-  
-    z-index: 10;
-  }
-  
-  .video--play svg {
-    width: 1.5rem;
-    height: 1.5rem;
     position: relative;
-    z-index: 2;
+    inset: auto;
+    margin: 0 auto;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
   }
-  
-  .video--play::before,
-  .video--play::after {
-    content: "";
-    position: absolute;
-    inset: -0.75rem;
-  
-    border-radius: 50%;
-    background: rgba(236, 123, 19, 0.4);
-  
-    pointer-events: none;
-    z-index: -1;
+}
+
+
+/* ==========================================================================
+   FORM ENHANCEMENTS
+   Phone Indicatif + Flag / Date Picker
+   ========================================================================== */
+
+/* ---------- Form Base ---------- */
+
+.form--item {
+  position: relative;
+}
+
+
+/* ---------- Phone Field - Intl Tel Input ---------- */
+
+.iti {
+  width: 100%;
+}
+
+.iti__tel-input,
+.iti input {
+  width: 100% !important;
+}
+
+.iti__selected-country {
+  padding-left: 1rem !important;
+  padding-right: 0.75rem !important;
+  border-radius: inherit;
+}
+
+.iti__country-list {
+  z-index: 99999 !important;
+  border: 1px solid currentColor !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.iti__country {
+  padding: 0.75rem 1rem !important;
+  font-size: 0.875rem !important;
+}
+
+.iti__dial-code {
+  opacity: 0.65;
+}
+
+
+/* ---------- Date Field - Flatpickr ---------- */
+
+#Date-Contact {
+  cursor: pointer;
+}
+
+.flatpickr-calendar {
+  font-family: inherit !important;
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.18) !important;
+  overflow: hidden !important;
+  z-index: 99999 !important;
+}
+
+.flatpickr-months,
+.flatpickr-weekdays {
+  background: transparent !important;
+}
+
+.flatpickr-day {
+  border-radius: 999rem !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: currentColor !important;
+  border-color: currentColor !important;
+}
+
+.flatpickr-day.selected {
+  color: #fff !important;
+}
+
+
+/* ---------- Form Mobile Responsive ---------- */
+
+@media screen and (max-width: 767px) {
+  .iti__country-list {
+    width: calc(100vw - 2rem) !important;
+    max-width: none !important;
+    left: 0 !important;
   }
-  
-  .video--play::before {
-    animation: pulse-bg 1.8s ease-out infinite;
+
+  .flatpickr-calendar {
+    width: calc(100vw - 2rem) !important;
+    max-width: none !important;
+    left: 1rem !important;
+    right: 1rem !important;
   }
-  
-  .video--play::after {
-    animation: pulse-bg 1.8s ease-out 0.9s infinite;
-  }
-  
-  @keyframes pulse-bg {
-    0% {
-      transform: scale(1);
-      opacity: 0;
-    }
-  
-    15% {
-      opacity: 0.7;
-    }
-  
-    100% {
-      transform: scale(1.7);
-      opacity: 0;
-    }
-  }
-  
-  /* Tablet + Mobile */
-  @media screen and (max-width: 991px) {
-    .video--play {
-      position: relative;
-      inset: auto;
-      margin: 0 auto;
-      left: auto;
-      right: auto;
-      top: auto;
-      bottom: auto;
-    }
-  }
+}
