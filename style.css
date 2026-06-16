@@ -517,25 +517,8 @@ html.nav-open .navbar--menu-close {
   }
 }
 /* ---------- Loading Screen Hero Reveal ---------- */
-
 [animation="load"] {
   opacity: 0;
   transform: translateY(2rem);
-  filter: blur(8px);
-
   will-change: transform, opacity, filter;
-}
-
-html.wf-design-mode [animation="load"] {
-  opacity: 1 !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-@media screen and (max-width: 991px) {
-  [animation="load"] {
-    opacity: 0;
-    transform: translateY(1.5rem);
-    filter: blur(6px);
-  }
 }
