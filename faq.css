@@ -1,0 +1,39 @@
+/* ==========================================
+   FAQ
+   ========================================== */
+
+   .faq--item {
+    border-bottom: 1px solid rgba(0,0,0,.1);
+  }
+  
+  .faq--question {
+    cursor: pointer;
+  }
+  
+  .faq--answer {
+    max-height: 0;
+    overflow: hidden;
+  
+    opacity: 0;
+    visibility: hidden;
+  
+    transition:
+      max-height .45s ease,
+      opacity .3s ease,
+      visibility .3s ease;
+  }
+  
+  .faq--item.is-open .faq--answer {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Optionnel : rotation icône */
+  
+  .faq--icon {
+    transition: transform .3s ease;
+  }
+  
+  .faq--item.is-open .faq--icon {
+    transform: rotate(45deg);
+  }
