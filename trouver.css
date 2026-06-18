@@ -48,10 +48,4 @@
   transform: scale(1.025);
   filter: brightness(1.08);
 }
-  /* GRID ANIMATION */
 
-@media screen and (min-width: 992px) {
-    .grid--concessionaire .concessionnaire--item:nth-child(2n) {
-      transform: translateY(3rem);
-    }
-  }
