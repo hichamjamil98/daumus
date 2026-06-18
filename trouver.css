@@ -1,0 +1,57 @@
+  /* MAP ANIMATION */
+.map--concessionaire svg {
+  opacity: 0;
+  transform: translateY(2rem) scale(0.96);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.map--concessionaire.is-visible svg {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.map--concessionaire svg path {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.96);
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease,
+    stroke-dashoffset 1.2s ease;
+}
+
+.map--concessionaire.is-visible svg path {
+  opacity: 1;
+  transform: scale(1);
+  stroke-dashoffset: 0;
+}
+
+.map--concessionaire.is-visible svg path:nth-child(1) { transition-delay: 0.05s; }
+.map--concessionaire.is-visible svg path:nth-child(2) { transition-delay: 0.12s; }
+.map--concessionaire.is-visible svg path:nth-child(3) { transition-delay: 0.19s; }
+.map--concessionaire.is-visible svg path:nth-child(4) { transition-delay: 0.26s; }
+.map--concessionaire.is-visible svg path:nth-child(5) { transition-delay: 0.33s; }
+.map--concessionaire.is-visible svg path:nth-child(6) { transition-delay: 0.40s; }
+.map--concessionaire.is-visible svg path:nth-child(7) { transition-delay: 0.47s; }
+.map--concessionaire.is-visible svg path:nth-child(8) { transition-delay: 0.54s; }
+.map--concessionaire.is-visible svg path:nth-child(9) { transition-delay: 0.61s; }
+.map--concessionaire.is-visible svg path:nth-child(10) { transition-delay: 0.68s; }
+
+.map--concessionaire svg path[fill="#EC7B13"] {
+  cursor: pointer;
+}
+
+.map--concessionaire svg path[fill="#EC7B13"]:hover {
+  transform: scale(1.025);
+  filter: brightness(1.08);
+}
+  /* GRID ANIMATION */
+
+@media screen and (min-width: 992px) {
+    .grid--concessionaire .concessionnaire--item:nth-child(2n) {
+      transform: translateY(3rem);
+    }
+  }
