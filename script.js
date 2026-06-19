@@ -4,89 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const isMobile = () => window.innerWidth <= 991;
 
   /* ===============================
-     LOADING SCREEN + WOW LOAD ANIMATION
-  =============================== */
-
-  const loadingScreen = document.querySelector(".loading--screen");
-  const logoWrapper = document.querySelector(".logo-loading_wrapper");
-  const progress = document.querySelector(".loading--progress");
-  const loadElements = document.querySelectorAll('[animation="load"]');
-
-  if (typeof gsap !== "undefined" && loadingScreen && logoWrapper && progress) {
-    gsap.set(loadElements, {
-      opacity: 0,
-      y: "2rem",
-      filter: "blur(8px)"
-    });
-
-    gsap.set(logoWrapper, {
-      opacity: 0,
-      y: "4rem",
-      scale: 0.98
-    });
-
-    gsap.set(loadingScreen, {
-      display: "flex",
-      yPercent: 0
-    });
-
-    const tl = gsap.timeline();
-
-    tl.to(logoWrapper, {
-      opacity: 1,
-      y: "0rem",
-      scale: 1,
-      duration: 0.8,
-      ease: "expo.out"
-    });
-
-    const counter = { value: 0 };
-
-    tl.to(counter, {
-      value: 100,
-      duration: 2,
-      ease: "power1.inOut",
-      onUpdate: () => {
-        progress.textContent = Math.round(counter.value) + "%";
-      }
-    });
-
-    tl.to(logoWrapper, {
-      opacity: 0,
-      scale: 0.98,
-      y: "-1rem",
-      duration: 0.5,
-      ease: "power2.inOut"
-    });
-
-    tl.to(loadingScreen, {
-      yPercent: -100,
-      duration: 1.1,
-      ease: "expo.inOut"
-    });
-
-    tl.to(loadElements, {
-      opacity: 1,
-      y: "0rem",
-      filter: "blur(0px)",
-      duration: 1.2,
-      stagger: {
-        each: 0.12,
-        from: "start"
-      },
-      ease: "power4.out"
-    }, "-=0.35");
-
-    tl.set(loadingScreen, {
-      display: "none"
-    });
-
-    tl.set(loadElements, {
-      clearProps: "willChange,filter"
-    });
-  }
-
-  /* ===============================
      ANIMATIONS
   =============================== */
 
@@ -107,27 +24,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const animatedItems = document.querySelectorAll(animationSelector);
   const staggerWrappers = document.querySelectorAll(staggerSelector);
 
-  const showElement = (el) => {
-    el.classList.add("is-visible");
-  };
-
-  const showStagger = (wrapper) => {
-    [...wrapper.children].forEach((child, index) => {
-      setTimeout(() => {
-        child.classList.add("is-visible");
-      }, index * 100);
-    });
-  };
-
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
 
         if (entry.target.matches(staggerSelector)) {
-          showStagger(entry.target);
+          [...entry.target.children].forEach((child, index) => {
+            setTimeout(() => {
+              child.classList.add("is-visible");
+            }, index * 100);
+          });
         } else {
-          showElement(entry.target);
+          entry.target.classList.add("is-visible");
         }
 
         observer.unobserve(entry.target);
@@ -158,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   setNavbarHeight();
-
   window.addEventListener("resize", setNavbarHeight);
   window.addEventListener("load", setNavbarHeight);
 
@@ -200,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item === dropdown) return;
 
         const itemList = item.querySelector(".nav--dropdown-list");
-
         item.classList.remove("is-open");
 
         if (itemList) {
@@ -273,28 +180,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const openMenu = () => {
     if (!isMobile()) return;
 
-    if (menu) {
-      menu.classList.add("is-open");
-    }
-
+    menu?.classList.add("is-open");
     lockPageScroll();
-
-    if (navbarTop) {
-      navbarTop.setAttribute("aria-hidden", "true");
-    }
+    navbarTop?.setAttribute("aria-hidden", "true");
   };
 
   const closeMenu = () => {
-    if (menu) {
-      menu.classList.remove("is-open");
-    }
-
+    menu?.classList.remove("is-open");
     closeAllDropdowns();
     unlockPageScroll();
-
-    if (navbarTop) {
-      navbarTop.removeAttribute("aria-hidden");
-    }
+    navbarTop?.removeAttribute("aria-hidden");
   };
 
   if (menuTrigger && menu) {
@@ -341,12 +236,12 @@ document.addEventListener("DOMContentLoaded", () => {
       button.classList.remove("is-hover");
     });
   });
-});
 
-/* ===============================
-   FOOTER YEAR
-=============================== */
+  /* ===============================
+     FOOTER YEAR
+  =============================== */
 
-document.querySelectorAll(".footer-year").forEach((el) => {
-  el.textContent = new Date().getFullYear();
+  document.querySelectorAll(".footer-year").forEach((el) => {
+    el.textContent = new Date().getFullYear();
+  });
 });
