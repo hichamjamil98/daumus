@@ -133,12 +133,13 @@
   
     if (phoneInput && window.intlTelInput) {
       const iti = window.intlTelInput(phoneInput, {
-        initialCountry: "ma",
-        preferredCountries: ["ma", "fr", "be", "ch", "es"],
+        initialCountry: "be",
+        preferredCountries: ["be", "fr", "ma", "ch", "es"],
         separateDialCode: true,
         nationalMode: false,
         formatAsYouType: true,
-        utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@25/build/js/utils.js"
+        utilsScript:
+          "https://cdn.jsdelivr.net/npm/intl-tel-input@25/build/js/utils.js"
       });
   
       form?.addEventListener("submit", () => {
