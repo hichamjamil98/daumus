@@ -4,7 +4,41 @@ document.addEventListener("DOMContentLoaded", () => {
   const isMobile = () => window.innerWidth <= 991;
 
   /* ===============================
-     ANIMATIONS
+     WOW LOAD ANIMATION
+  =============================== */
+
+  const loadElements = document.querySelectorAll('[animation="load"]');
+
+  if (typeof gsap !== "undefined" && loadElements.length) {
+    gsap.set(loadElements, {
+      opacity: 0,
+      y: "2rem",
+      filter: "blur(8px)"
+    });
+
+    const tl = gsap.timeline({
+      delay: 0.2
+    });
+
+    tl.to(loadElements, {
+      opacity: 1,
+      y: "0rem",
+      filter: "blur(0px)",
+      duration: 1.2,
+      stagger: {
+        each: 0.12,
+        from: "start"
+      },
+      ease: "power4.out"
+    });
+
+    tl.set(loadElements, {
+      clearProps: "willChange,filter"
+    });
+  }
+
+  /* ===============================
+     SCROLL ANIMATIONS
   =============================== */
 
   const animationSelector = [
@@ -24,19 +58,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const animatedItems = document.querySelectorAll(animationSelector);
   const staggerWrappers = document.querySelectorAll(staggerSelector);
 
+  const showElement = (el) => {
+    el.classList.add("is-visible");
+  };
+
+  const showStagger = (wrapper) => {
+    [...wrapper.children].forEach((child, index) => {
+      setTimeout(() => {
+        child.classList.add("is-visible");
+      }, index * 100);
+    });
+  };
+
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
 
         if (entry.target.matches(staggerSelector)) {
-          [...entry.target.children].forEach((child, index) => {
-            setTimeout(() => {
-              child.classList.add("is-visible");
-            }, index * 100);
-          });
+          showStagger(entry.target);
         } else {
-          entry.target.classList.add("is-visible");
+          showElement(entry.target);
         }
 
         observer.unobserve(entry.target);
@@ -108,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item === dropdown) return;
 
         const itemList = item.querySelector(".nav--dropdown-list");
+
         item.classList.remove("is-open");
 
         if (itemList) {
@@ -180,16 +223,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const openMenu = () => {
     if (!isMobile()) return;
 
-    menu?.classList.add("is-open");
+    if (menu) {
+      menu.classList.add("is-open");
+    }
+
     lockPageScroll();
-    navbarTop?.setAttribute("aria-hidden", "true");
+
+    if (navbarTop) {
+      navbarTop.setAttribute("aria-hidden", "true");
+    }
   };
 
   const closeMenu = () => {
-    menu?.classList.remove("is-open");
+    if (menu) {
+      menu.classList.remove("is-open");
+    }
+
     closeAllDropdowns();
     unlockPageScroll();
-    navbarTop?.removeAttribute("aria-hidden");
+
+    if (navbarTop) {
+      navbarTop.removeAttribute("aria-hidden");
+    }
   };
 
   if (menuTrigger && menu) {
