@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const isOpen = item.classList.contains("is-open");
 
-      // Fermer tous les FAQs
       faqItems.forEach((otherItem) => {
 
         otherItem.classList.remove("is-open");
@@ -27,13 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (otherAnswer) {
           otherAnswer.style.maxHeight = "0px";
         }
+
       });
 
-      // Ouvrir le FAQ cliqué
       if (!isOpen) {
 
         item.classList.add("is-open");
-
         answer.style.maxHeight = answer.scrollHeight + "px";
 
       }
@@ -42,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 
-  // Recalcul si resize
   let resizeTimer;
 
   window.addEventListener("resize", () => {
