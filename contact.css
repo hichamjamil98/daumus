@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PHONE FIELD - Intl Tel Input
+   PHONE FIELD - INTL TEL INPUT
    ========================================================================== */
 
    .form--item {
@@ -10,33 +10,87 @@
     width: 100%;
   }
   
+  /* ---------- Input ---------- */
+  
   .iti__tel-input,
-  .iti input {
+  .iti input,
+  #Phone {
     width: 100% !important;
+    color: #212121 !important;
   }
+  
+  .iti__tel-input::placeholder,
+  .iti input::placeholder,
+  #Phone::placeholder {
+    color: #212121 !important;
+    opacity: 1;
+  }
+  
+  /* ---------- Selected Country ---------- */
   
   .iti__selected-country {
     padding-left: 1rem !important;
     padding-right: 0.75rem !important;
     border-radius: inherit;
+    color: #212121 !important;
   }
+  
+  .iti__selected-country-primary,
+  .iti__selected-dial-code {
+    color: #212121 !important;
+  }
+  
+  /* ---------- Dropdown ---------- */
   
   .iti__country-list {
     z-index: 99999 !important;
-    border: 1px solid currentColor !important;
+    border: 1px solid #212121 !important;
     border-radius: 0.75rem !important;
     overflow: hidden;
     box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+    color: #212121 !important;
   }
   
   .iti__country {
     padding: 0.75rem 1rem !important;
     font-size: 0.875rem !important;
+    color: #212121 !important;
+  }
+  
+  .iti__country-name,
+  .iti__dial-code {
+    color: #212121 !important;
   }
   
   .iti__dial-code {
-    opacity: 0.65;
+    opacity: 1 !important;
   }
+  
+  /* ---------- Search ---------- */
+  
+  .iti__search-input {
+    color: #212121 !important;
+  }
+  
+  .iti__search-input::placeholder {
+    color: #212121 !important;
+    opacity: 1;
+  }
+  
+  /* ---------- Arrow ---------- */
+  
+  .iti__arrow {
+    border-top-color: #212121 !important;
+  }
+  
+  /* ---------- Hover ---------- */
+  
+  .iti__country:hover,
+  .iti__country.iti__highlight {
+    color: #212121 !important;
+  }
+  
+  /* ---------- Mobile ---------- */
   
   @media screen and (max-width: 767px) {
     .iti__country-list {
