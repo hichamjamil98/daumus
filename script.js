@@ -300,3 +300,58 @@ document.addEventListener("DOMContentLoaded", () => {
     el.textContent = new Date().getFullYear();
   });
 });
+
+
+  /* =============================== BLOG Links Hover  =============================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof gsap === "undefined") return;
+
+  document.querySelectorAll(".conseil--link").forEach(link => {
+
+    const rod = link.querySelector(".rod--orange");
+
+    gsap.set(rod, {
+      scaleX: 0,
+      transformOrigin: "left center"
+    });
+
+    link.addEventListener("mouseenter", () => {
+
+      gsap.killTweensOf(rod);
+
+      gsap.set(rod, {
+        transformOrigin: "left center"
+      });
+
+      gsap.to(rod, {
+        scaleX: 1,
+        duration: 0.65,
+        ease: "expo.out"
+      });
+
+    });
+
+    link.addEventListener("mouseleave", () => {
+
+      gsap.killTweensOf(rod);
+
+      gsap.set(rod, {
+        transformOrigin: "right center"
+      });
+
+      gsap.to(rod, {
+        scaleX: 0,
+        duration: 0.5,
+        ease: "expo.out",
+        onComplete: () => {
+          gsap.set(rod, {
+            transformOrigin: "left center"
+          });
+        }
+      });
+
+    });
+
+  });
+});
