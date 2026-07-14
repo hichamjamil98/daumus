@@ -534,3 +534,31 @@ html.nav-open .navbar--menu-close {
   transform-origin: left center;
   pointer-events: none;
 }
+
+
+
+/* ==========================================================================
+   FIL D’ARIANE
+========================================================================== */
+
+.arianne--wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.arianne--wrapper .icon--8 {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.link--arianne {
+  display: inline-block;
+}
+
+.link--arianne.is--current {
+  opacity: 0.6;
+  pointer-events: none;
+}

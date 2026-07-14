@@ -355,3 +355,286 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 });
+
+
+  /* ==========================================================================
+     FIL D’ARIANE
+  ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const breadcrumbWrapper = document.querySelector(".arianne--wrapper");
+
+  if (!breadcrumbWrapper) return;
+
+  const currentPath = normalizePath(window.location.pathname);
+
+  /**
+   * Nettoie les chemins pour faciliter les comparaisons.
+   * Exemple :
+   * /humidite-mur/ devient /humidite-mur
+   */
+  function normalizePath(path) {
+    if (!path) return "/";
+
+    const normalized = path
+      .split("?")[0]
+      .split("#")[0]
+      .replace(/\/+/g, "/")
+      .replace(/\/$/, "");
+
+    return normalized || "/";
+  }
+
+  /**
+   * Transforme un texte en texte propre.
+   */
+  function cleanText(text) {
+    return String(text || "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /**
+   * Crée le séparateur SVG.
+   */
+  function createSeparator() {
+    const namespace = "http://www.w3.org/2000/svg";
+
+    const svg = document.createElementNS(namespace, "svg");
+    svg.setAttribute("xmlns", namespace);
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("viewBox", "0 0 8 8");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("aria-hidden", "true");
+    svg.classList.add("icon--8");
+
+    const path = document.createElementNS(namespace, "path");
+    path.setAttribute(
+      "d",
+      "M2.75 0L2 0.75L5.25 4L2 7.25L2.75 8L6.75 4L2.75 0Z"
+    );
+    path.setAttribute("fill", "currentColor");
+
+    svg.appendChild(path);
+
+    return svg;
+  }
+
+  /**
+   * Crée un lien du fil d’Ariane.
+   */
+  function createBreadcrumbLink(label, href) {
+    const link = document.createElement("a");
+
+    link.href = href;
+    link.className = "link--arianne";
+    link.textContent = cleanText(label);
+
+    return link;
+  }
+
+  /**
+   * Crée le texte correspondant à la page actuelle.
+   */
+  function createCurrentPage(label) {
+    const current = document.createElement("span");
+
+    current.className = "link--arianne is--current";
+    current.textContent = cleanText(label);
+    current.setAttribute("aria-current", "page");
+
+    return current;
+  }
+
+  /**
+   * Recherche le lien de navigation correspondant à la page actuelle.
+   */
+  function findCurrentNavigationLink() {
+    const navigationLinks = Array.from(
+      document.querySelectorAll(
+        [
+          ".navbar a[href]",
+          ".footer a[href]"
+        ].join(",")
+      )
+    );
+
+    return navigationLinks.find(function (link) {
+      const href = link.getAttribute("href");
+
+      if (
+        !href ||
+        href === "#" ||
+        href.startsWith("mailto:") ||
+        href.startsWith("tel:") ||
+        href.startsWith("javascript:")
+      ) {
+        return false;
+      }
+
+      let linkPath;
+
+      try {
+        linkPath = normalizePath(new URL(link.href, window.location.origin).pathname);
+      } catch (error) {
+        return false;
+      }
+
+      return linkPath === currentPath;
+    });
+  }
+
+  /**
+   * Récupère le nom de la page actuelle.
+   *
+   * Priorité :
+   * 1. lien actif dans la navigation ;
+   * 2. H1 de la page ;
+   * 3. titre HTML ;
+   * 4. slug de l’URL.
+   */
+  function getCurrentPageName(currentNavigationLink) {
+    if (currentNavigationLink) {
+      const navigationLabel = cleanText(currentNavigationLink.textContent);
+
+      if (navigationLabel) {
+        return navigationLabel;
+      }
+    }
+
+    const pageHeading = document.querySelector("main h1");
+
+    if (pageHeading) {
+      const headingText = cleanText(pageHeading.textContent);
+
+      if (headingText) {
+        return headingText;
+      }
+    }
+
+    const documentTitle = cleanText(
+      document.title
+        .split("|")[0]
+        .split("–")[0]
+        .split("—")[0]
+    );
+
+    if (documentTitle) {
+      return documentTitle;
+    }
+
+    const currentSlug = currentPath.split("/").filter(Boolean).pop();
+
+    if (currentSlug) {
+      return currentSlug
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, function (letter) {
+          return letter.toUpperCase();
+        });
+    }
+
+    return "Accueil";
+  }
+
+  /**
+   * Recherche le parent du dropdown contenant la page active.
+   *
+   * Exemple :
+   * Traitement de l’humidité > Humidité mur
+   */
+  function getDropdownParent(currentNavigationLink) {
+    if (!currentNavigationLink) return null;
+
+    const dropdown = currentNavigationLink.closest(".nav--dropdown");
+
+    if (!dropdown) return null;
+
+    const dropdownTrigger = dropdown.querySelector(
+      ":scope > .nav--dropdown-trigger"
+    );
+
+    if (!dropdownTrigger) return null;
+
+    const parentHref = dropdownTrigger.getAttribute("href");
+    const parentLabel = cleanText(dropdownTrigger.textContent);
+
+    if (!parentHref || parentHref === "#" || !parentLabel) {
+      return null;
+    }
+
+    const parentPath = normalizePath(
+      new URL(parentHref, window.location.origin).pathname
+    );
+
+    if (parentPath === currentPath) {
+      return null;
+    }
+
+    return {
+      label: parentLabel,
+      href: dropdownTrigger.href
+    };
+  }
+
+  /**
+   * Ajoute un élément au fil d’Ariane avec son séparateur.
+   */
+  function appendBreadcrumbItem(element, addSeparatorBefore) {
+    if (addSeparatorBefore) {
+      breadcrumbWrapper.appendChild(createSeparator());
+    }
+
+    breadcrumbWrapper.appendChild(element);
+  }
+
+  /**
+   * Génération du fil d’Ariane.
+   */
+  function buildBreadcrumb() {
+    const currentNavigationLink = findCurrentNavigationLink();
+    const currentPageName = getCurrentPageName(currentNavigationLink);
+    const dropdownParent = getDropdownParent(currentNavigationLink);
+
+    const items = [];
+
+    /*
+     * On n’affiche pas "Accueil > Accueil"
+     * sur la page d’accueil.
+     */
+    if (currentPath !== "/") {
+      items.push({
+        type: "link",
+        label: "Accueil",
+        href: "/"
+      });
+    }
+
+    if (dropdownParent) {
+      items.push({
+        type: "link",
+        label: dropdownParent.label,
+        href: dropdownParent.href
+      });
+    }
+
+    items.push({
+      type: "current",
+      label: currentPageName
+    });
+
+    breadcrumbWrapper.innerHTML = "";
+    breadcrumbWrapper.setAttribute("aria-label", "Fil d’Ariane");
+
+    items.forEach(function (item, index) {
+      const element =
+        item.type === "current"
+          ? createCurrentPage(item.label)
+          : createBreadcrumbLink(item.label, item.href);
+
+      appendBreadcrumbItem(element, index > 0);
+    });
+  }
+
+  buildBreadcrumb();
+});
