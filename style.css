@@ -559,6 +559,6 @@ html.nav-open .navbar--menu-close {
 }
 
 .link--arianne.is--current {
-  opacity: 0.6;
+  font-weight: 600;
   pointer-events: none;
 }
