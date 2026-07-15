@@ -212,3 +212,15 @@
     right: 1rem !important;
   }
 }
+
+/* ---------- Video Responsive ---------- */
+
+
+@media screen and (min-width: 1720px) {
+  .video--bg-image {
+    min-width: 60vw;
+  }
+  .mask {
+    min-width: 63vw;
+  }
+}
