@@ -1,0 +1,13 @@
+/* ==========================================================================
+   LARGE SCREEN VIDEO ADJUSTMENTS
+========================================================================== */
+
+@media screen and (min-width: 1720px) {
+    .video--bg-image {
+      min-width: 60vw;
+    }
+  
+    .mask.is--pro {
+      min-width: 58vw;
+    }
+  }
