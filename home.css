@@ -4,223 +4,405 @@
 
 
 /* ==========================================================================
-   FOOTER
+   GLOBAL
    ========================================================================== */
 
-/* ---------- Footer Inline Links ---------- */
-
-.flex--wrap {
-  display: block;
-  line-height: 1.6;
-}
-
-.footer--link,
-.footer--link .text-block,
-.flex--wrap .text-size-14 {
-  display: inline;
-}
-
-.footer--link .text-block {
-  white-space: normal;
-  overflow-wrap: break-word;
-}
-
-.flex--wrap .text-size-14 {
-  margin-right: 0.25rem;
-}
-
-
-/* ==========================================================================
-   VIDEO
-   ========================================================================== */
-
-/* ---------- Video Play Button ---------- */
-
-.video--play {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-
-  width: 5rem;
-  height: 5rem;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-  background: #EC7B13;
-  color: #fff;
-
-  z-index: 10;
-}
-
-.video--play svg {
-  width: 1.5rem;
-  height: 1.5rem;
-  position: relative;
-  z-index: 2;
-}
-
-.video--play::before,
-.video--play::after {
-  content: "";
-  position: absolute;
-  inset: -0.75rem;
-
-  border-radius: 50%;
-  background: rgba(236, 123, 19, 0.4);
-
-  pointer-events: none;
-  z-index: -1;
-}
-
-.video--play::before {
-  animation: pulse-bg 1.8s ease-out infinite;
-}
-
-.video--play::after {
-  animation: pulse-bg 1.8s ease-out 0.9s infinite;
-}
-
-@keyframes pulse-bg {
-  0% {
-    transform: scale(1);
-    opacity: 0;
-  }
-
-  15% {
-    opacity: 0.7;
-  }
-
-  100% {
-    transform: scale(1.7);
-    opacity: 0;
-  }
-}
-
-/* Tablet + Mobile */
-@media screen and (max-width: 991px) {
-  .video--play {
-    position: relative;
-    inset: auto;
-    margin: 0 auto;
-    left: auto;
-    right: auto;
-    top: auto;
-    bottom: auto;
-  }
-}
-
-
-/* ==========================================================================
-   FORM ENHANCEMENTS
-   Phone Indicatif + Flag / Date Picker
-   ========================================================================== */
-
-/* ---------- Form Base ---------- */
-
-.form--item {
-  position: relative;
-}
-
-
-/* ---------- Phone Field - Intl Tel Input ---------- */
-
-.iti {
-  width: 100%;
-}
-
-.iti__tel-input,
-.iti input {
-  width: 100% !important;
-}
-
-.iti__selected-country {
-  padding-left: 1rem !important;
-  padding-right: 0.75rem !important;
-  border-radius: inherit;
-}
-
-.iti__country-list {
-  z-index: 99999 !important;
-  border: 1px solid currentColor !important;
-  border-radius: 0.75rem !important;
-  overflow: hidden;
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
-}
-
-.iti__country {
-  padding: 0.75rem 1rem !important;
-  font-size: 0.875rem !important;
-}
-
-.iti__dial-code {
-  opacity: 0.65;
-}
-
-
-/* ---------- Date Field - Flatpickr ---------- */
-
-#Date-Contact {
-  cursor: pointer;
-}
-
-.flatpickr-calendar {
-  font-family: inherit !important;
-  border: none !important;
-  border-radius: 1rem !important;
-  box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.18) !important;
-  overflow: hidden !important;
-  z-index: 99999 !important;
-}
-
-.flatpickr-months,
-.flatpickr-weekdays {
-  background: transparent !important;
-}
-
-.flatpickr-day {
-  border-radius: 999rem !important;
-}
-
-.flatpickr-day.selected,
-.flatpickr-day.startRange,
-.flatpickr-day.endRange {
-  background: currentColor !important;
-  border-color: currentColor !important;
-}
-
-.flatpickr-day.selected {
-  color: #fff !important;
-}
-
-
-/* ---------- Form Mobile Responsive ---------- */
-
-@media screen and (max-width: 767px) {
-  .iti__country-list {
-    width: calc(100vw - 2rem) !important;
-    max-width: none !important;
-    left: 0 !important;
-  }
-
-  .flatpickr-calendar {
-    width: calc(100vw - 2rem) !important;
-    max-width: none !important;
-    left: 1rem !important;
-    right: 1rem !important;
-  }
-}
-
-/* ---------- Video Responsive ---------- */
-
-
-@media screen and (min-width: 1720px) {
-  .video--bg-image {
-    min-width: 60vw;
-  }
-  .mask {
-    min-width: 63vw;
-  }
-}
+   html.is--modal-open,
+   body.is--modal-open {
+     overflow: hidden !important;
+   }
+   
+   
+   /* ==========================================================================
+      FOOTER
+      ========================================================================== */
+   
+   /* ---------- Footer Inline Links ---------- */
+   
+   .flex--wrap {
+     display: block;
+     line-height: 1.6;
+   }
+   
+   .footer--link,
+   .footer--link .text-block,
+   .flex--wrap .text-size-14 {
+     display: inline;
+   }
+   
+   .footer--link .text-block {
+     white-space: normal;
+     overflow-wrap: break-word;
+   }
+   
+   .flex--wrap .text-size-14 {
+     margin-right: 0.25rem;
+   }
+   
+   
+   /* ==========================================================================
+      VIDEO
+      ========================================================================== */
+   
+   /* ---------- Video Play Button ---------- */
+   
+   .video--play {
+     position: absolute;
+     inset: 0;
+     margin: auto;
+   
+     width: 5rem;
+     height: 5rem;
+   
+     display: flex;
+     align-items: center;
+     justify-content: center;
+   
+     border: 0;
+     border-radius: 50%;
+   
+     background: #ec7b13;
+     color: #fff;
+   
+     cursor: pointer;
+     z-index: 10;
+   
+     transition:
+       transform 0.35s ease,
+       background-color 0.35s ease;
+   }
+   
+   .video--play:hover {
+     transform: scale(1.06);
+   }
+   
+   .video--play svg {
+     position: relative;
+     z-index: 2;
+   
+     width: 1.5rem;
+     height: 1.5rem;
+   
+     pointer-events: none;
+   }
+   
+   .video--play::before,
+   .video--play::after {
+     content: "";
+   
+     position: absolute;
+     inset: -0.75rem;
+   
+     border-radius: 50%;
+     background: rgba(236, 123, 19, 0.4);
+   
+     pointer-events: none;
+     z-index: -1;
+   }
+   
+   .video--play::before {
+     animation: pulse-bg 1.8s ease-out infinite;
+   }
+   
+   .video--play::after {
+     animation: pulse-bg 1.8s ease-out 0.9s infinite;
+   }
+   
+   @keyframes pulse-bg {
+     0% {
+       transform: scale(1);
+       opacity: 0;
+     }
+   
+     15% {
+       opacity: 0.7;
+     }
+   
+     100% {
+       transform: scale(1.7);
+       opacity: 0;
+     }
+   }
+   
+   
+   /* ---------- Video Modal ---------- */
+   
+   .video-modal {
+     position: fixed;
+     inset: 0;
+   
+     display: none;
+     align-items: center;
+     justify-content: center;
+   
+     width: 100%;
+     height: 100%;
+   
+     padding: 2rem;
+   
+     background: rgba(0, 0, 0, 0.8);
+     z-index: 999999;
+   }
+   
+   .video-modal_inside {
+     position: relative;
+   
+     width: min(75rem, 100%);
+     max-height: calc(100vh - 4rem);
+   
+     overflow: hidden;
+   }
+   
+   .video-modal iframe {
+     display: block;
+   
+     width: 100%;
+     aspect-ratio: 16 / 9;
+   
+     border: 0;
+   }
+   
+   
+   /* ---------- Video Tablet + Mobile ---------- */
+   
+   @media screen and (max-width: 991px) {
+     .video--play {
+       position: relative;
+       inset: auto;
+   
+       left: auto;
+       right: auto;
+       top: auto;
+       bottom: auto;
+   
+       margin: 0 auto;
+     }
+   
+     .video-modal {
+       padding: 1rem;
+     }
+   }
+   
+   
+   /* ==========================================================================
+      FORM ENHANCEMENTS
+      ========================================================================== */
+   
+   /* ---------- Form Base ---------- */
+   
+   .form--item {
+     position: relative;
+   }
+   
+   
+   /* ==========================================================================
+      PHONE FIELD - INTL TEL INPUT
+      ========================================================================== */
+   
+   .iti {
+     position: relative;
+     width: 100%;
+   }
+   
+   /*
+    * Supporte plusieurs formulaires et tous les champs téléphone,
+    * sans dépendre uniquement de l'ID #Phone.
+    */
+   .iti__tel-input,
+   .iti input,
+   input[type="tel"],
+   input[data-phone-input] {
+     width: 100% !important;
+   }
+   
+   /* ---------- Selected Country ---------- */
+   
+   .iti__selected-country {
+     padding-left: 1rem !important;
+     padding-right: 0.75rem !important;
+   
+     border: 0;
+     border-radius: inherit;
+   
+     color: inherit !important;
+     background: transparent !important;
+   }
+   
+   .iti__selected-country-primary {
+     display: flex;
+     align-items: center;
+     gap: 0.4rem;
+   }
+   
+   .iti__selected-dial-code {
+     color: inherit !important;
+   }
+   
+   .iti__arrow {
+     margin-left: 0.35rem;
+   }
+   
+   
+   /* ---------- Phone Dropdown ---------- */
+   
+   .iti__dropdown-content {
+     z-index: 999999 !important;
+   
+     border: 1px solid currentColor !important;
+     border-radius: 0.75rem !important;
+   
+     overflow: hidden;
+   
+     background: #fff !important;
+     color: #212121 !important;
+   
+     box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+   }
+   
+   .iti__country-list {
+     z-index: 999999 !important;
+   
+     max-height: 18rem !important;
+   
+     border: 0 !important;
+     border-radius: 0.75rem !important;
+   
+     background: #fff !important;
+     color: #212121 !important;
+   }
+   
+   .iti__country {
+     padding: 0.75rem 1rem !important;
+   
+     font-size: 0.875rem !important;
+     color: #212121 !important;
+   
+     transition: background-color 0.2s ease;
+   }
+   
+   .iti__country:hover,
+   .iti__country.iti__highlight {
+     background: rgba(33, 33, 33, 0.08) !important;
+   }
+   
+   .iti__country-name,
+   .iti__dial-code {
+     color: #212121 !important;
+   }
+   
+   .iti__dial-code {
+     opacity: 0.65;
+   }
+   
+   
+   /* ---------- Phone Search ---------- */
+   
+   .iti__search-input {
+     width: 100% !important;
+   
+     padding: 0.75rem 1rem !important;
+   
+     border: 0 !important;
+     border-bottom: 1px solid rgba(33, 33, 33, 0.15) !important;
+     border-radius: 0 !important;
+   
+     color: #212121 !important;
+     background: #fff !important;
+   
+     outline: none !important;
+   }
+   
+   
+   /* ==========================================================================
+      DATE FIELD - FLATPICKR
+      ========================================================================== */
+   
+   input[id^="Date-Contact"],
+   input[name="Date-Contact"],
+   input[data-date-picker] {
+     cursor: pointer;
+   }
+   
+   .flatpickr-calendar {
+     z-index: 999999 !important;
+   
+     overflow: hidden !important;
+   
+     font-family: inherit !important;
+   
+     border: none !important;
+     border-radius: 1rem !important;
+   
+     box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.18) !important;
+   }
+   
+   .flatpickr-months,
+   .flatpickr-weekdays {
+     background: transparent !important;
+   }
+   
+   .flatpickr-day {
+     border-radius: 999rem !important;
+   }
+   
+   .flatpickr-day.selected,
+   .flatpickr-day.startRange,
+   .flatpickr-day.endRange {
+     background: #212121 !important;
+     border-color: #212121 !important;
+     color: #fff !important;
+   }
+   
+   .flatpickr-day.today {
+     border-color: #212121 !important;
+   }
+   
+   
+   /* ==========================================================================
+      FORM MOBILE RESPONSIVE
+      ========================================================================== */
+   
+   @media screen and (max-width: 767px) {
+     /*
+      * Le dropdown est ajouté dans body avec dropdownContainer,
+      * il reste donc visible même dans un parent avec overflow hidden.
+      */
+     .iti--container {
+       left: 1rem !important;
+       right: 1rem !important;
+   
+       width: calc(100vw - 2rem) !important;
+       max-width: none !important;
+   
+       z-index: 999999 !important;
+     }
+   
+     .iti--container .iti__dropdown-content,
+     .iti--container .iti__country-list {
+       width: 100% !important;
+       max-width: none !important;
+     }
+   
+     .flatpickr-calendar {
+       left: 1rem !important;
+       right: 1rem !important;
+   
+       width: calc(100vw - 2rem) !important;
+       max-width: none !important;
+     }
+   }
+   
+   
+   /* ==========================================================================
+      VIDEO RESPONSIVE - LARGE SCREENS
+      ========================================================================== */
+   
+   @media screen and (min-width: 1720px) {
+     .video--bg-image {
+       min-width: 60vw;
+     }
+   
+     .mask {
+       min-width: 63vw;
+     }
+   }
