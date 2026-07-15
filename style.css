@@ -562,3 +562,27 @@ html.nav-open .navbar--menu-close {
   font-weight: 600;
   pointer-events: none;
 }
+
+
+/* ==========================================================================
+   LANGUAGE VISIBILITY — FR / NL
+========================================================================== */
+
+/* Éléments masqués par le JavaScript */
+body .is--language-hidden {
+  display: none !important;
+}
+
+html.is--language-fr body [lang="nl"],
+html.is--language-fr body [lang^="nl-"],
+html.is--language-nl body [lang="fr"],
+html.is--language-nl body [lang^="fr-"] {
+  display: none !important;
+}
+
+html.wf-design-mode body [lang="fr"],
+html.wf-design-mode body [lang^="fr-"],
+html.wf-design-mode body [lang="nl"],
+html.wf-design-mode body [lang^="nl-"] {
+  display: revert !important;
+}

@@ -58,40 +58,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const animatedItems = document.querySelectorAll(animationSelector);
   const staggerWrappers = document.querySelectorAll(staggerSelector);
 
-  const showElement = (el) => {
-    el.classList.add("is-visible");
+  const showElement = (element) => {
+    element.classList.add("is-visible");
   };
 
   const showStagger = (wrapper) => {
     [...wrapper.children].forEach((child, index) => {
-      setTimeout(() => {
+      window.setTimeout(() => {
         child.classList.add("is-visible");
       }, index * 100);
     });
   };
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
 
-        if (entry.target.matches(staggerSelector)) {
-          showStagger(entry.target);
-        } else {
-          showElement(entry.target);
-        }
+          if (entry.target.matches(staggerSelector)) {
+            showStagger(entry.target);
+          } else {
+            showElement(entry.target);
+          }
 
-        observer.unobserve(entry.target);
-      });
-    },
-    {
-      threshold: 0.12,
-      rootMargin: "0px 0px -5% 0px"
-    }
-  );
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -5% 0px"
+      }
+    );
 
-  animatedItems.forEach((el) => observer.observe(el));
-  staggerWrappers.forEach((el) => observer.observe(el));
+    animatedItems.forEach((element) => observer.observe(element));
+    staggerWrappers.forEach((element) => observer.observe(element));
+  } else {
+    animatedItems.forEach(showElement);
+    staggerWrappers.forEach(showStagger);
+  }
 
   /* ===============================
      NAVBAR HEIGHT MOBILE
@@ -105,10 +110,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    body.style.setProperty("--navbar-height-mobile", `${navbar.offsetHeight}px`);
+    body.style.setProperty(
+      "--navbar-height-mobile",
+      `${navbar.offsetHeight}px`
+    );
   };
 
   setNavbarHeight();
+
   window.addEventListener("resize", setNavbarHeight);
   window.addEventListener("load", setNavbarHeight);
 
@@ -138,27 +147,33 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    trigger.addEventListener("click", (e) => {
+    trigger.addEventListener("click", (event) => {
       if (!isMobile()) return;
 
-      e.preventDefault();
-      e.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
       const isOpen = dropdown.classList.contains("is-open");
 
-      document.querySelectorAll(".nav--dropdown.is-open").forEach((item) => {
-        if (item === dropdown) return;
+      document
+        .querySelectorAll(".nav--dropdown.is-open")
+        .forEach((item) => {
+          if (item === dropdown) return;
 
-        const itemList = item.querySelector(".nav--dropdown-list");
+          const itemList = item.querySelector(".nav--dropdown-list");
 
-        item.classList.remove("is-open");
+          item.classList.remove("is-open");
 
-        if (itemList) {
-          itemList.style.height = "0px";
-        }
-      });
+          if (itemList) {
+            itemList.style.height = "0px";
+          }
+        });
 
-      isOpen ? closeDropdown() : openDropdown();
+      if (isOpen) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
     });
   });
 
@@ -177,7 +192,9 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const lockPageScroll = () => {
-    scrollPosition = window.scrollY || document.documentElement.scrollTop;
+    scrollPosition =
+      window.scrollY || document.documentElement.scrollTop;
+
     const scrollbarWidth = getScrollbarWidth();
 
     body.style.position = "fixed";
@@ -209,15 +226,17 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const closeAllDropdowns = () => {
-    document.querySelectorAll(".nav--dropdown.is-open").forEach((dropdown) => {
-      const list = dropdown.querySelector(".nav--dropdown-list");
+    document
+      .querySelectorAll(".nav--dropdown.is-open")
+      .forEach((dropdown) => {
+        const list = dropdown.querySelector(".nav--dropdown-list");
 
-      dropdown.classList.remove("is-open");
+        dropdown.classList.remove("is-open");
 
-      if (list && isMobile()) {
-        list.style.height = "0px";
-      }
-    });
+        if (list && isMobile()) {
+          list.style.height = "0px";
+        }
+      });
   };
 
   const openMenu = () => {
@@ -248,11 +267,15 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   if (menuTrigger && menu) {
-    menuTrigger.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    menuTrigger.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-      html.classList.contains("nav-open") ? closeMenu() : openMenu();
+      if (html.classList.contains("nav-open")) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
     });
   }
 
@@ -262,14 +285,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isMobile()) {
       closeMenu();
 
-      document.querySelectorAll(".nav--dropdown-list").forEach((list) => {
-        list.style.height = "";
-      });
+      document
+        .querySelectorAll(".nav--dropdown-list")
+        .forEach((list) => {
+          list.style.height = "";
+        });
     }
   });
 
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && html.classList.contains("nav-open")) {
+  window.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Escape" &&
+      html.classList.contains("nav-open")
+    ) {
       closeMenu();
     }
   });
@@ -279,9 +307,9 @@ document.addEventListener("DOMContentLoaded", () => {
   =============================== */
 
   document.querySelectorAll(".button").forEach((button) => {
-    const bg = button.querySelector(".button-bg");
+    const background = button.querySelector(".button-bg");
 
-    if (!bg) return;
+    if (!background) return;
 
     button.addEventListener("mouseenter", () => {
       button.classList.add("is-hover");
@@ -296,20 +324,22 @@ document.addEventListener("DOMContentLoaded", () => {
      FOOTER YEAR
   =============================== */
 
-  document.querySelectorAll(".footer-year").forEach((el) => {
-    el.textContent = new Date().getFullYear();
+  document.querySelectorAll(".footer-year").forEach((element) => {
+    element.textContent = new Date().getFullYear();
   });
 });
 
-
-  /* =============================== BLOG Links Hover  =============================== */
+/* ==========================================================================
+   BLOG LINKS HOVER
+========================================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof gsap === "undefined") return;
 
-  document.querySelectorAll(".conseil--link").forEach(link => {
-
+  document.querySelectorAll(".conseil--link").forEach((link) => {
     const rod = link.querySelector(".rod--orange");
+
+    if (!rod) return;
 
     gsap.set(rod, {
       scaleX: 0,
@@ -317,7 +347,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     link.addEventListener("mouseenter", () => {
-
       gsap.killTweensOf(rod);
 
       gsap.set(rod, {
@@ -329,11 +358,9 @@ document.addEventListener("DOMContentLoaded", () => {
         duration: 0.65,
         ease: "expo.out"
       });
-
     });
 
     link.addEventListener("mouseleave", () => {
-
       gsap.killTweensOf(rod);
 
       gsap.set(rod, {
@@ -350,30 +377,21 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
       });
-
     });
-
   });
 });
 
+/* ==========================================================================
+   FIL D’ARIANE
+========================================================================== */
 
-  /* ==========================================================================
-     FIL D’ARIANE
-  ========================================================================== */
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  const breadcrumbWrapper = document.querySelector(".arianne--wrapper");
+document.addEventListener("DOMContentLoaded", () => {
+  const breadcrumbWrapper = document.querySelector(
+    ".arianne--wrapper"
+  );
 
   if (!breadcrumbWrapper) return;
 
-  const currentPath = normalizePath(window.location.pathname);
-
-  /**
-   * Nettoie les chemins pour faciliter les comparaisons.
-   * Exemple :
-   * /humidite-mur/ devient /humidite-mur
-   */
   function normalizePath(path) {
     if (!path) return "/";
 
@@ -386,22 +404,19 @@ document.addEventListener("DOMContentLoaded", function () {
     return normalized || "/";
   }
 
-  /**
-   * Transforme un texte en texte propre.
-   */
   function cleanText(text) {
     return String(text || "")
       .replace(/\s+/g, " ")
       .trim();
   }
 
-  /**
-   * Crée le séparateur SVG.
-   */
+  const currentPath = normalizePath(window.location.pathname);
+
   function createSeparator() {
     const namespace = "http://www.w3.org/2000/svg";
 
     const svg = document.createElementNS(namespace, "svg");
+
     svg.setAttribute("xmlns", namespace);
     svg.setAttribute("width", "100%");
     svg.setAttribute("viewBox", "0 0 8 8");
@@ -410,10 +425,12 @@ document.addEventListener("DOMContentLoaded", function () {
     svg.classList.add("icon--8");
 
     const path = document.createElementNS(namespace, "path");
+
     path.setAttribute(
       "d",
       "M2.75 0L2 0.75L5.25 4L2 7.25L2.75 8L6.75 4L2.75 0Z"
     );
+
     path.setAttribute("fill", "currentColor");
 
     svg.appendChild(path);
@@ -421,9 +438,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return svg;
   }
 
-  /**
-   * Crée un lien du fil d’Ariane.
-   */
   function createBreadcrumbLink(label, href) {
     const link = document.createElement("a");
 
@@ -434,9 +448,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return link;
   }
 
-  /**
-   * Crée le texte correspondant à la page actuelle.
-   */
   function createCurrentPage(label) {
     const current = document.createElement("span");
 
@@ -447,9 +458,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return current;
   }
 
-  /**
-   * Recherche le lien de navigation correspondant à la page actuelle.
-   */
   function findCurrentNavigationLink() {
     const navigationLinks = Array.from(
       document.querySelectorAll(
@@ -460,7 +468,7 @@ document.addEventListener("DOMContentLoaded", function () {
       )
     );
 
-    return navigationLinks.find(function (link) {
+    return navigationLinks.find((link) => {
       const href = link.getAttribute("href");
 
       if (
@@ -476,7 +484,12 @@ document.addEventListener("DOMContentLoaded", function () {
       let linkPath;
 
       try {
-        linkPath = normalizePath(new URL(link.href, window.location.origin).pathname);
+        linkPath = normalizePath(
+          new URL(
+            link.href,
+            window.location.origin
+          ).pathname
+        );
       } catch (error) {
         return false;
       }
@@ -485,18 +498,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  /**
-   * Récupère le nom de la page actuelle.
-   *
-   * Priorité :
-   * 1. lien actif dans la navigation ;
-   * 2. H1 de la page ;
-   * 3. titre HTML ;
-   * 4. slug de l’URL.
-   */
   function getCurrentPageName(currentNavigationLink) {
     if (currentNavigationLink) {
-      const navigationLabel = cleanText(currentNavigationLink.textContent);
+      const navigationLabel = cleanText(
+        currentNavigationLink.textContent
+      );
 
       if (navigationLabel) {
         return navigationLabel;
@@ -524,12 +530,15 @@ document.addEventListener("DOMContentLoaded", function () {
       return documentTitle;
     }
 
-    const currentSlug = currentPath.split("/").filter(Boolean).pop();
+    const currentSlug = currentPath
+      .split("/")
+      .filter(Boolean)
+      .pop();
 
     if (currentSlug) {
       return currentSlug
         .replace(/-/g, " ")
-        .replace(/\b\w/g, function (letter) {
+        .replace(/\b\w/g, (letter) => {
           return letter.toUpperCase();
         });
     }
@@ -537,35 +546,58 @@ document.addEventListener("DOMContentLoaded", function () {
     return "Accueil";
   }
 
-  /**
-   * Recherche le parent du dropdown contenant la page active.
-   *
-   * Exemple :
-   * Traitement de l’humidité > Humidité mur
-   */
   function getDropdownParent(currentNavigationLink) {
     if (!currentNavigationLink) return null;
 
-    const dropdown = currentNavigationLink.closest(".nav--dropdown");
+    const dropdown = currentNavigationLink.closest(
+      ".nav--dropdown"
+    );
 
     if (!dropdown) return null;
 
-    const dropdownTrigger = dropdown.querySelector(
-      ":scope > .nav--dropdown-trigger"
-    );
+    let dropdownTrigger = null;
+
+    try {
+      dropdownTrigger = dropdown.querySelector(
+        ":scope > .nav--dropdown-trigger"
+      );
+    } catch (error) {
+      dropdownTrigger = Array.from(dropdown.children).find(
+        (child) =>
+          child.classList &&
+          child.classList.contains(
+            "nav--dropdown-trigger"
+          )
+      );
+    }
 
     if (!dropdownTrigger) return null;
 
     const parentHref = dropdownTrigger.getAttribute("href");
-    const parentLabel = cleanText(dropdownTrigger.textContent);
+    const parentLabel = cleanText(
+      dropdownTrigger.textContent
+    );
 
-    if (!parentHref || parentHref === "#" || !parentLabel) {
+    if (
+      !parentHref ||
+      parentHref === "#" ||
+      !parentLabel
+    ) {
       return null;
     }
 
-    const parentPath = normalizePath(
-      new URL(parentHref, window.location.origin).pathname
-    );
+    let parentPath;
+
+    try {
+      parentPath = normalizePath(
+        new URL(
+          parentHref,
+          window.location.origin
+        ).pathname
+      );
+    } catch (error) {
+      return null;
+    }
 
     if (parentPath === currentPath) {
       return null;
@@ -577,31 +609,31 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 
-  /**
-   * Ajoute un élément au fil d’Ariane avec son séparateur.
-   */
-  function appendBreadcrumbItem(element, addSeparatorBefore) {
+  function appendBreadcrumbItem(
+    element,
+    addSeparatorBefore
+  ) {
     if (addSeparatorBefore) {
-      breadcrumbWrapper.appendChild(createSeparator());
+      breadcrumbWrapper.appendChild(
+        createSeparator()
+      );
     }
 
     breadcrumbWrapper.appendChild(element);
   }
 
-  /**
-   * Génération du fil d’Ariane.
-   */
   function buildBreadcrumb() {
-    const currentNavigationLink = findCurrentNavigationLink();
-    const currentPageName = getCurrentPageName(currentNavigationLink);
-    const dropdownParent = getDropdownParent(currentNavigationLink);
+    const currentNavigationLink =
+      findCurrentNavigationLink();
+
+    const currentPageName =
+      getCurrentPageName(currentNavigationLink);
+
+    const dropdownParent =
+      getDropdownParent(currentNavigationLink);
 
     const items = [];
 
-    /*
-     * On n’affiche pas "Accueil > Accueil"
-     * sur la page d’accueil.
-     */
     if (currentPath !== "/") {
       items.push({
         type: "link",
@@ -624,17 +656,290 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     breadcrumbWrapper.innerHTML = "";
-    breadcrumbWrapper.setAttribute("aria-label", "Fil d’Ariane");
+    breadcrumbWrapper.setAttribute(
+      "aria-label",
+      "Fil d’Ariane"
+    );
 
-    items.forEach(function (item, index) {
+    items.forEach((item, index) => {
       const element =
         item.type === "current"
           ? createCurrentPage(item.label)
-          : createBreadcrumbLink(item.label, item.href);
+          : createBreadcrumbLink(
+              item.label,
+              item.href
+            );
 
-      appendBreadcrumbItem(element, index > 0);
+      appendBreadcrumbItem(
+        element,
+        index > 0
+      );
     });
   }
 
   buildBreadcrumb();
 });
+
+/* ==========================================================================
+   LANGUAGE VISIBILITY — FR / NL
+========================================================================== */
+
+(function () {
+  "use strict";
+
+  const SUPPORTED_LANGUAGES = ["fr", "nl"];
+  const HIDDEN_CLASS = "is--language-hidden";
+
+  function normalizeLanguage(language) {
+    if (!language) return "";
+
+    return language
+      .toString()
+      .trim()
+      .toLowerCase()
+      .split("-")[0];
+  }
+
+  function getCurrentLanguage() {
+    const htmlLanguage = normalizeLanguage(
+      document.documentElement.getAttribute("lang")
+    );
+
+    if (
+      SUPPORTED_LANGUAGES.includes(htmlLanguage)
+    ) {
+      return htmlLanguage;
+    }
+
+    const pathSegments = window.location.pathname
+      .toLowerCase()
+      .split("/")
+      .filter(Boolean);
+
+    if (pathSegments.includes("nl")) {
+      return "nl";
+    }
+
+    return "fr";
+  }
+
+  function getLanguageFields(element) {
+    if (
+      element.matches(
+        "input, select, textarea, button"
+      )
+    ) {
+      return [element];
+    }
+
+    return Array.from(
+      element.querySelectorAll(
+        "input, select, textarea, button"
+      )
+    );
+  }
+
+  function updateFieldState(
+    field,
+    shouldDisplay
+  ) {
+    if (!shouldDisplay) {
+      if (
+        !field.hasAttribute(
+          "data-language-was-disabled"
+        )
+      ) {
+        field.setAttribute(
+          "data-language-was-disabled",
+          field.disabled ? "true" : "false"
+        );
+      }
+
+      field.disabled = true;
+      return;
+    }
+
+    const wasDisabled = field.getAttribute(
+      "data-language-was-disabled"
+    );
+
+    if (wasDisabled === "false") {
+      field.disabled = false;
+    }
+
+    field.removeAttribute(
+      "data-language-was-disabled"
+    );
+  }
+
+  function updateLanguageElements() {
+    const currentLanguage =
+      getCurrentLanguage();
+
+    const htmlElement =
+      document.documentElement;
+
+    htmlElement.classList.remove(
+      "is--language-fr",
+      "is--language-nl"
+    );
+
+    htmlElement.classList.add(
+      `is--language-${currentLanguage}`
+    );
+
+    const languageElements =
+      document.querySelectorAll(
+        [
+          'body [lang="fr"]',
+          'body [lang^="fr-"]',
+          'body [lang="nl"]',
+          'body [lang^="nl-"]'
+        ].join(",")
+      );
+
+    languageElements.forEach((element) => {
+      const elementLanguage =
+        normalizeLanguage(
+          element.getAttribute("lang")
+        );
+
+      const shouldDisplay =
+        elementLanguage === currentLanguage;
+
+      element.classList.toggle(
+        HIDDEN_CLASS,
+        !shouldDisplay
+      );
+
+      element.setAttribute(
+        "aria-hidden",
+        shouldDisplay ? "false" : "true"
+      );
+
+      const formFields =
+        getLanguageFields(element);
+
+      formFields.forEach((field) => {
+        updateFieldState(
+          field,
+          shouldDisplay
+        );
+      });
+    });
+
+    document.dispatchEvent(
+      new CustomEvent(
+        "languageVisibilityUpdated",
+        {
+          detail: {
+            language: currentLanguage
+          }
+        }
+      )
+    );
+  }
+
+  function initLanguageVisibility() {
+    updateLanguageElements();
+
+    const htmlObserver =
+      new MutationObserver((mutations) => {
+        const languageChanged =
+          mutations.some((mutation) => {
+            return (
+              mutation.type === "attributes" &&
+              mutation.attributeName === "lang"
+            );
+          });
+
+        if (languageChanged) {
+          updateLanguageElements();
+        }
+      });
+
+    htmlObserver.observe(
+      document.documentElement,
+      {
+        attributes: true,
+        attributeFilter: ["lang"]
+      }
+    );
+
+    let updateQueued = false;
+
+    const queueLanguageUpdate = () => {
+      if (updateQueued) return;
+
+      updateQueued = true;
+
+      window.requestAnimationFrame(() => {
+        updateQueued = false;
+        updateLanguageElements();
+      });
+    };
+
+    const bodyObserver =
+      new MutationObserver((mutations) => {
+        const hasNewLanguageElements =
+          mutations.some((mutation) => {
+            return Array.from(
+              mutation.addedNodes
+            ).some((node) => {
+              if (node.nodeType !== 1) {
+                return false;
+              }
+
+              const element = node;
+
+              return (
+                element.matches?.(
+                  '[lang="fr"], [lang^="fr-"], [lang="nl"], [lang^="nl-"]'
+                ) ||
+                element.querySelector?.(
+                  '[lang="fr"], [lang^="fr-"], [lang="nl"], [lang^="nl-"]'
+                )
+              );
+            });
+          });
+
+        if (hasNewLanguageElements) {
+          queueLanguageUpdate();
+        }
+      });
+
+    bodyObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    window.addEventListener(
+      "popstate",
+      updateLanguageElements
+    );
+
+    window.addEventListener(
+      "hashchange",
+      updateLanguageElements
+    );
+
+    document.addEventListener(
+      "languageChanged",
+      updateLanguageElements
+    );
+
+    document.addEventListener(
+      "weglotLanguageChanged",
+      updateLanguageElements
+    );
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initLanguageVisibility
+    );
+  } else {
+    initLanguageVisibility();
+  }
+})();
