@@ -749,7 +749,7 @@ window.addEventListener("load", function () {
 
     addHubSpotField(
       fields,
-      "zip",
+      "code_postal",
       getFieldValue(form, "Code-postal")
     );
 
