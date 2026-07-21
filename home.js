@@ -429,3 +429,785 @@
       realSubmit.style.display = "none";
     }
   }
+  /* ==========================================================================
+   WEBFLOW NATIVE FORMS → HUBSPOT
+   DAUMUS — CONTACT PARTICULIER FR / NL
+========================================================================== */
+
+window.addEventListener("load", function () {
+  "use strict";
+
+  /* ==========================================================================
+     CONFIGURATION
+  ========================================================================== */
+
+  const HUBSPOT_PORTAL_ID = "26541958";
+
+  const HUBSPOT_DATE_PROPERTY = "date_de_contact";
+
+  const DEBUG_MODE = true;
+
+  const FORMS_CONFIG = [
+    {
+      selector: "#wf-form-Particulier-Form---Fr",
+      hubspotFormId: "ef087c85-92e1-43b9-885c-99fb576b540d",
+      language: "fr",
+      loadingText: "Envoi en cours...",
+      publicErrorText:
+        "Une erreur est survenue. Merci de réessayer."
+    },
+    {
+      selector: "#wf-form-Particulier-Form---Nl",
+      hubspotFormId: "11e7abc5-33a5-46f1-ace6-3559f9379169",
+      language: "nl",
+      loadingText: "Bezig met verzenden...",
+      publicErrorText:
+        "Er is een fout opgetreden. Probeer het opnieuw."
+    }
+  ];
+
+  /* ==========================================================================
+     FIELDS
+  ========================================================================== */
+
+  function getField(form, fieldName) {
+    return form.querySelector(`[name="${fieldName}"]`);
+  }
+
+  function getFieldValue(form, fieldName) {
+    const field = getField(form, fieldName);
+
+    if (!field) {
+      return "";
+    }
+
+    return String(field.value || "").trim();
+  }
+
+  function addHubSpotField(fields, name, value) {
+    if (!name || value === undefined || value === null) {
+      return;
+    }
+
+    const cleanValue = String(value).trim();
+
+    if (!cleanValue) {
+      return;
+    }
+
+    fields.push({
+      name: name,
+      value: cleanValue
+    });
+  }
+
+  /* ==========================================================================
+     HUBSPOT COOKIE
+  ========================================================================== */
+
+  function getHubSpotCookie() {
+    const cookie = document.cookie
+      .split("; ")
+      .find(function (item) {
+        return item.startsWith("hubspotutk=");
+      });
+
+    return cookie ? cookie.split("=")[1] || "" : "";
+  }
+
+  /* ==========================================================================
+     PHONE — INTL TEL INPUT
+  ========================================================================== */
+
+  function getInternationalPhone(form) {
+    const phoneInput =
+      getField(form, "Phone") ||
+      getField(form, "phone") ||
+      form.querySelector('input[type="tel"]');
+
+    if (!phoneInput) {
+      return "";
+    }
+
+    /*
+     * intl-tel-input moderne
+     */
+    if (
+      window.intlTelInput &&
+      typeof window.intlTelInput.getInstance === "function"
+    ) {
+      const instance =
+        window.intlTelInput.getInstance(phoneInput);
+
+      if (
+        instance &&
+        typeof instance.getNumber === "function"
+      ) {
+        const number = instance.getNumber();
+
+        if (number) {
+          return number;
+        }
+      }
+    }
+
+    /*
+     * Compatibilité anciennes versions
+     */
+    if (
+      window.intlTelInputGlobals &&
+      typeof window.intlTelInputGlobals.getInstance ===
+        "function"
+    ) {
+      const instance =
+        window.intlTelInputGlobals.getInstance(phoneInput);
+
+      if (
+        instance &&
+        typeof instance.getNumber === "function"
+      ) {
+        const number = instance.getNumber();
+
+        if (number) {
+          return number;
+        }
+      }
+    }
+
+    /*
+     * Fallback manuel
+     */
+    let phoneValue = String(phoneInput.value || "")
+      .trim()
+      .replace(/[^\d+]/g, "");
+
+    if (!phoneValue) {
+      return "";
+    }
+
+    if (phoneValue.startsWith("+")) {
+      return phoneValue;
+    }
+
+    const phoneWrapper = phoneInput.closest(".iti");
+
+    const dialCode =
+      phoneWrapper
+        ?.querySelector(".iti__selected-dial-code")
+        ?.textContent
+        ?.trim() || "";
+
+    phoneValue = phoneValue.replace(/^0+/, "");
+
+    return `${dialCode}${phoneValue}`;
+  }
+
+  /* ==========================================================================
+     DATE
+  ========================================================================== */
+
+  function convertDateToHubSpotTimestamp(value) {
+    if (!value) {
+      return "";
+    }
+
+    const cleanValue = String(value).trim();
+
+    /*
+     * Formats acceptés :
+     *
+     * 22/07/2026
+     * 22/07/2026 à 12:00
+     * 22/07/2026 at 12:00
+     * 22-07-2026
+     * 2026-07-22
+     */
+
+    let day;
+    let month;
+    let year;
+    let hours = 0;
+    let minutes = 0;
+    let match;
+
+    /*
+     * DD/MM/YYYY avec heure optionnelle
+     */
+    match = cleanValue.match(
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s*(?:à|at)\s*(\d{1,2}):(\d{2}))?$/i
+    );
+
+    if (match) {
+      day = Number(match[1]);
+      month = Number(match[2]);
+      year = Number(match[3]);
+      hours = Number(match[4] || 0);
+      minutes = Number(match[5] || 0);
+    }
+
+    /*
+     * DD-MM-YYYY avec heure optionnelle
+     */
+    if (!year) {
+      match = cleanValue.match(
+        /^(\d{1,2})-(\d{1,2})-(\d{4})(?:\s*(?:à|at)\s*(\d{1,2}):(\d{2}))?$/i
+      );
+
+      if (match) {
+        day = Number(match[1]);
+        month = Number(match[2]);
+        year = Number(match[3]);
+        hours = Number(match[4] || 0);
+        minutes = Number(match[5] || 0);
+      }
+    }
+
+    /*
+     * YYYY-MM-DD avec heure optionnelle
+     */
+    if (!year) {
+      match = cleanValue.match(
+        /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2}))?$/
+      );
+
+      if (match) {
+        year = Number(match[1]);
+        month = Number(match[2]);
+        day = Number(match[3]);
+        hours = Number(match[4] || 0);
+        minutes = Number(match[5] || 0);
+      }
+    }
+
+    if (!year || !month || !day) {
+      console.warn(
+        "Format de date non reconnu :",
+        cleanValue
+      );
+
+      return "";
+    }
+
+    const date = new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day,
+        hours,
+        minutes,
+        0,
+        0
+      )
+    );
+
+    /*
+     * Vérification de validité
+     */
+    if (
+      date.getUTCFullYear() !== year ||
+      date.getUTCMonth() !== month - 1 ||
+      date.getUTCDate() !== day
+    ) {
+      console.warn(
+        "Date invalide :",
+        cleanValue
+      );
+
+      return "";
+    }
+
+    /*
+     * HubSpot attend un timestamp en millisecondes.
+     */
+    return String(date.getTime());
+  }
+
+  /* ==========================================================================
+     PAYLOAD
+  ========================================================================== */
+
+  function buildHubSpotFields(form) {
+    const fields = [];
+
+    addHubSpotField(
+      fields,
+      "lastname",
+      getFieldValue(form, "lastname")
+    );
+
+    addHubSpotField(
+      fields,
+      "firstname",
+      getFieldValue(form, "firstname")
+    );
+
+    addHubSpotField(
+      fields,
+      "phone",
+      getInternationalPhone(form)
+    );
+
+    addHubSpotField(
+      fields,
+      "zip",
+      getFieldValue(form, "Code-postal")
+    );
+
+    const contactDate = getFieldValue(
+      form,
+      "Quand-souhaitez-vous-tre-recontact"
+    );
+
+    addHubSpotField(
+      fields,
+      HUBSPOT_DATE_PROPERTY,
+      convertDateToHubSpotTimestamp(contactDate)
+    );
+
+    return fields;
+  }
+
+  function buildHubSpotContext() {
+    const context = {
+      pageUri: window.location.href,
+      pageName: document.title
+    };
+
+    const hutk = getHubSpotCookie();
+
+    if (hutk) {
+      context.hutk = hutk;
+    }
+
+    return context;
+  }
+
+  /* ==========================================================================
+     HUBSPOT ERROR
+  ========================================================================== */
+
+  function getHubSpotErrorMessage(responseData, status) {
+    const messages = [];
+
+    if (
+      responseData &&
+      Array.isArray(responseData.errors)
+    ) {
+      responseData.errors.forEach(function (error) {
+        if (error.message) {
+          messages.push(error.message);
+        } else if (error.errorType) {
+          messages.push(error.errorType);
+        } else {
+          try {
+            messages.push(JSON.stringify(error));
+          } catch (jsonError) {
+            messages.push(
+              "Erreur HubSpot non détaillée"
+            );
+          }
+        }
+      });
+    }
+
+    if (messages.length) {
+      return messages.join(" | ");
+    }
+
+    if (responseData?.message) {
+      return responseData.message;
+    }
+
+    if (responseData?.rawResponse) {
+      return responseData.rawResponse;
+    }
+
+    return `Erreur HubSpot ${status}`;
+  }
+
+  /* ==========================================================================
+     SEND TO HUBSPOT
+  ========================================================================== */
+
+  async function sendToHubSpot(form, config) {
+    const endpoint =
+      "https://api.hsforms.com/submissions/v3/integration/submit/" +
+      `${HUBSPOT_PORTAL_ID}/${config.hubspotFormId}`;
+
+    const payload = {
+      submittedAt: Date.now(),
+      fields: buildHubSpotFields(form),
+      context: buildHubSpotContext()
+    };
+
+    console.group(
+      `HubSpot — ${config.language.toUpperCase()}`
+    );
+
+    console.log("Endpoint :", endpoint);
+    console.log("Payload :", payload);
+    console.log(
+      "Payload JSON :",
+      JSON.stringify(payload, null, 2)
+    );
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json;charset=UTF-8"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const responseText = await response.text();
+
+    let responseData = null;
+
+    if (responseText) {
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (error) {
+        responseData = {
+          rawResponse: responseText
+        };
+      }
+    }
+
+    console.log("HTTP :", response.status);
+    console.log("Réponse :", responseData);
+    console.groupEnd();
+
+    if (!response.ok) {
+      const errorMessage =
+        getHubSpotErrorMessage(
+          responseData,
+          response.status
+        );
+
+      const error = new Error(errorMessage);
+
+      error.status = response.status;
+      error.response = responseData;
+      error.payload = payload;
+
+      throw error;
+    }
+
+    return responseData;
+  }
+
+  /* ==========================================================================
+     WEBFLOW MESSAGES
+  ========================================================================== */
+
+  function getFormMessages(form) {
+    const formBlock = form.closest(".w-form");
+
+    return {
+      formBlock: formBlock,
+      successMessage:
+        formBlock?.querySelector(".w-form-done") ||
+        null,
+      errorMessage:
+        formBlock?.querySelector(".w-form-fail") ||
+        null
+    };
+  }
+
+  function hideMessages(form) {
+    const messages = getFormMessages(form);
+
+    if (messages.successMessage) {
+      messages.successMessage.style.display =
+        "none";
+
+      messages.successMessage.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+    }
+
+    if (messages.errorMessage) {
+      messages.errorMessage.style.display =
+        "none";
+
+      messages.errorMessage.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+    }
+  }
+
+  function showSuccess(form) {
+    const messages = getFormMessages(form);
+
+    form.style.display = "none";
+
+    if (messages.errorMessage) {
+      messages.errorMessage.style.display =
+        "none";
+
+      messages.errorMessage.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+    }
+
+    if (messages.successMessage) {
+      messages.successMessage.style.display =
+        "block";
+
+      messages.successMessage.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      messages.successMessage.focus();
+    }
+  }
+
+  function showError(form, message) {
+    const messages = getFormMessages(form);
+
+    form.style.display = "";
+
+    if (messages.successMessage) {
+      messages.successMessage.style.display =
+        "none";
+
+      messages.successMessage.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+    }
+
+    if (messages.errorMessage) {
+      const errorText =
+        messages.errorMessage.querySelector("div");
+
+      if (errorText) {
+        errorText.textContent = message;
+      }
+
+      messages.errorMessage.style.display =
+        "block";
+
+      messages.errorMessage.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      messages.errorMessage.focus();
+    }
+  }
+
+  /* ==========================================================================
+     CUSTOM BUTTON
+  ========================================================================== */
+
+  function getCustomButton(form) {
+    return form.querySelector(
+      ".btn--wrapper .button"
+    );
+  }
+
+  function getCustomButtonText(button) {
+    if (!button) {
+      return null;
+    }
+
+    return (
+      Array.from(button.children).find(
+        function (child) {
+          return !child.classList.contains(
+            "button-bg"
+          );
+        }
+      ) || null
+    );
+  }
+
+  function setSubmittingState(
+    form,
+    config,
+    isSubmitting
+  ) {
+    const nativeSubmit = form.querySelector(
+      'input[type="submit"]'
+    );
+
+    const customButton =
+      getCustomButton(form);
+
+    const customButtonText =
+      getCustomButtonText(customButton);
+
+    if (nativeSubmit) {
+      nativeSubmit.disabled = isSubmitting;
+    }
+
+    if (customButton) {
+      customButton.style.pointerEvents =
+        isSubmitting ? "none" : "";
+
+      customButton.setAttribute(
+        "aria-disabled",
+        isSubmitting ? "true" : "false"
+      );
+    }
+
+    if (customButtonText) {
+      if (
+        !customButtonText.dataset.originalText
+      ) {
+        customButtonText.dataset.originalText =
+          customButtonText.textContent.trim();
+      }
+
+      customButtonText.textContent =
+        isSubmitting
+          ? config.loadingText
+          : customButtonText.dataset.originalText;
+    }
+  }
+
+  /* ==========================================================================
+     INITIALIZATION
+  ========================================================================== */
+
+  FORMS_CONFIG.forEach(function (config) {
+    const form = document.querySelector(
+      config.selector
+    );
+
+    if (!form) {
+      console.warn(
+        `Formulaire introuvable : ${config.selector}`
+      );
+
+      return;
+    }
+
+    if (
+      form.dataset.hubspotInitialized === "true"
+    ) {
+      return;
+    }
+
+    form.dataset.hubspotInitialized = "true";
+    form.dataset.hubspotSubmitting = "false";
+
+    hideMessages(form);
+
+    const customButton =
+      getCustomButton(form);
+
+    const nativeSubmit = form.querySelector(
+      'input[type="submit"]'
+    );
+
+    if (customButton) {
+      customButton.addEventListener(
+        "click",
+        function (event) {
+          event.preventDefault();
+
+          if (
+            form.dataset.hubspotSubmitting ===
+            "true"
+          ) {
+            return;
+          }
+
+          if (
+            typeof form.requestSubmit ===
+            "function"
+          ) {
+            if (nativeSubmit) {
+              form.requestSubmit(nativeSubmit);
+            } else {
+              form.requestSubmit();
+            }
+
+            return;
+          }
+
+          if (nativeSubmit) {
+            nativeSubmit.click();
+          }
+        }
+      );
+    }
+
+    form.addEventListener(
+      "submit",
+      async function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
+        if (
+          form.dataset.hubspotSubmitting ===
+          "true"
+        ) {
+          return;
+        }
+
+        hideMessages(form);
+
+        if (
+          typeof form.reportValidity ===
+            "function" &&
+          !form.reportValidity()
+        ) {
+          return;
+        }
+
+        form.dataset.hubspotSubmitting = "true";
+
+        setSubmittingState(
+          form,
+          config,
+          true
+        );
+
+        try {
+          await sendToHubSpot(form, config);
+
+          console.log(
+            `Formulaire ${config.language.toUpperCase()} envoyé à HubSpot.`
+          );
+
+          form.reset();
+
+          showSuccess(form);
+        } catch (error) {
+          console.error(
+            `Erreur formulaire ${config.language.toUpperCase()} :`,
+            error
+          );
+
+          const visibleMessage = DEBUG_MODE
+            ? `HubSpot : ${error.message}`
+            : config.publicErrorText;
+
+          showError(
+            form,
+            visibleMessage
+          );
+        } finally {
+          form.dataset.hubspotSubmitting =
+            "false";
+
+          setSubmittingState(
+            form,
+            config,
+            false
+          );
+        }
+      },
+      true
+    );
+  });
+});
