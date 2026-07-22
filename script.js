@@ -653,9 +653,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function findCurrentNavigationLink() {
     const navigationLinks = Array.from(
       document.querySelectorAll(
-        ".navbar a[href], .footer a[href]"
+        [
+          ".navbar--menu a[href]",
+          ".navbar--top-menu a[href]",
+          ".footer a[href]"
+        ].join(",")
       )
-    );
+    ).filter((link) => {
+      /*
+       * Ne jamais utiliser les liens FR / NL du sélecteur
+       * de langue comme nom de page dans le fil d’Ariane.
+       */
+      return !link.closest(
+        ".localization--wrapper, .w-locales-list, .w-locales-items"
+      );
+    });
 
     const matchingLinks = navigationLinks.filter((link) => {
       return (
@@ -665,7 +677,14 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
+    /*
+     * Priorité au vrai lien courant de Webflow, puis au lien visible.
+     */
     return (
+      matchingLinks.find((link) =>
+        link.classList.contains("w--current") ||
+        link.getAttribute("aria-current") === "page"
+      ) ||
       matchingLinks.find(isElementVisible) ||
       matchingLinks[0] ||
       null
