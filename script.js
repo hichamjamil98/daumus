@@ -943,3 +943,197 @@ document.addEventListener("DOMContentLoaded", () => {
     initLanguageVisibility();
   }
 })();
+
+/* ==========================================================================
+   WEBFLOW LOCALIZATION DROPDOWN
+========================================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const wrappers = document.querySelectorAll(
+    ".localization--wrapper"
+  );
+
+  wrappers.forEach((wrapper) => {
+    const localeItems = Array.from(
+      wrapper.querySelectorAll(".w-locales-item")
+    );
+
+    if (localeItems.length < 2) return;
+
+    const localesContainer = wrapper.querySelector(
+      ".w-locales-items"
+    );
+
+    const pageLanguage = (
+      document.documentElement.lang || ""
+    )
+      .trim()
+      .toLowerCase()
+      .split("-")[0];
+
+    let currentItem = localeItems.find((item) => {
+      const link = item.querySelector("a");
+
+      return (
+        item.classList.contains("w--current") ||
+        link?.classList.contains("w--current") ||
+        link?.getAttribute("aria-current") === "page"
+      );
+    });
+
+    if (!currentItem && pageLanguage) {
+      currentItem = localeItems.find((item) => {
+        const link = item.querySelector("a");
+
+        const linkLanguage = (
+          link?.getAttribute("hreflang") ||
+          link?.getAttribute("lang") ||
+          item.getAttribute("lang") ||
+          ""
+        )
+          .trim()
+          .toLowerCase()
+          .split("-")[0];
+
+        const linkText = link?.textContent
+          .trim()
+          .toLowerCase();
+
+        return (
+          linkLanguage === pageLanguage ||
+          linkText === pageLanguage
+        );
+      });
+    }
+
+    if (!currentItem) {
+      currentItem = localeItems[0];
+    }
+
+    localeItems.forEach((item) => {
+      item.classList.toggle(
+        "is--current-language",
+        item === currentItem
+      );
+    });
+
+    /*
+     * Place la langue actuelle en première position.
+     */
+    if (localesContainer) {
+      localesContainer.prepend(currentItem);
+    }
+
+    wrapper.setAttribute("role", "button");
+    wrapper.setAttribute("tabindex", "0");
+    wrapper.setAttribute("aria-haspopup", "menu");
+    wrapper.setAttribute("aria-expanded", "false");
+
+    const closeDropdown = () => {
+      wrapper.classList.remove("is--open");
+      wrapper.setAttribute("aria-expanded", "false");
+    };
+
+    const openDropdown = () => {
+      document
+        .querySelectorAll(
+          ".localization--wrapper.is--open"
+        )
+        .forEach((otherWrapper) => {
+          if (otherWrapper !== wrapper) {
+            otherWrapper.classList.remove("is--open");
+            otherWrapper.setAttribute(
+              "aria-expanded",
+              "false"
+            );
+          }
+        });
+
+      wrapper.classList.add("is--open");
+      wrapper.setAttribute("aria-expanded", "true");
+    };
+
+    const toggleDropdown = () => {
+      if (wrapper.classList.contains("is--open")) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
+    };
+
+    wrapper.addEventListener("click", (event) => {
+      const clickedItem = event.target.closest(
+        ".w-locales-item"
+      );
+
+      /*
+       * Clic sur l'autre langue :
+       * on laisse le vrai lien Webflow fonctionner.
+       */
+      if (
+        clickedItem &&
+        !clickedItem.classList.contains(
+          "is--current-language"
+        )
+      ) {
+        const link = clickedItem.querySelector("a");
+        const href = link?.getAttribute("href");
+
+        if (!href || href === "#") {
+          event.preventDefault();
+
+          console.error(
+            "Le Locale Link doit être connecté à Locales list item > Page dans Webflow."
+          );
+        }
+
+        return;
+      }
+
+      /*
+       * Clic sur la langue actuelle ou la flèche.
+       */
+      event.preventDefault();
+      event.stopPropagation();
+      toggleDropdown();
+    });
+
+    wrapper.addEventListener("keydown", (event) => {
+      if (
+        event.key === "Enter" ||
+        event.key === " "
+      ) {
+        event.preventDefault();
+        toggleDropdown();
+      }
+
+      if (event.key === "Escape") {
+        closeDropdown();
+        wrapper.focus();
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        openDropdown();
+
+        const secondaryLink = wrapper.querySelector(
+          ".w-locales-item:not(.is--current-language) a"
+        );
+
+        secondaryLink?.focus();
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!wrapper.contains(event.target)) {
+        closeDropdown();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeDropdown();
+      }
+    });
+  });
+});
