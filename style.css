@@ -721,3 +721,26 @@ html.wf-design-mode body [lang^="nl-"] {
   outline: 0.125rem solid currentColor;
   outline-offset: 0.25rem;
 }
+
+
+/* ==========================================================================
+   MOBILE / TABLET — MENU PARTICULIER / PROFESSIONNEL
+========================================================================== */
+
+@media screen and (max-width: 991px) {
+  .navbar--menu.is--professional,
+  .navbar--menu.is--particulier {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .navbar--menu.is--professional.is-open,
+  .navbar--menu.is--particulier.is-open {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
