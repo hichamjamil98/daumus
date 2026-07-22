@@ -181,14 +181,17 @@ document.addEventListener("DOMContentLoaded", () => {
      MOBILE / TABLET HAMBURGER
   =============================== */
 
-  const menuTrigger = document.querySelector(
-    ".navbar-menu-trigger"
+  const menuTrigger = document.querySelector(".navbar-menu-trigger");
+  const navbarElement = document.querySelector(".navbar");
+  const professionalMenu = document.querySelector(
+    ".navbar--menu.is--professional"
   );
-
-  const menus = Array.from(
+  const particulierMenu = document.querySelector(
+    ".navbar--menu.is--particulier"
+  );
+  const navbarMenus = Array.from(
     document.querySelectorAll(".navbar--menu")
   );
-
   const navbarTop = document.querySelector(".navbar--top");
 
   let scrollPosition = 0;
@@ -197,112 +200,42 @@ document.addEventListener("DOMContentLoaded", () => {
     return window.innerWidth - document.documentElement.clientWidth;
   };
 
-  const getCurrentNavbarType = () => {
-    /*
-     * 1. Source principale : le sélecteur
-     * Particulier / Professionnel actif dans Webflow.
-     */
-    const professionalTypeLink = document.querySelector(
-      [
-        ".nav--type-link.is--professional.w--current",
-        ".nav--type-link.is--professionel.w--current",
-        '.nav--type-link.is--professional[aria-current="page"]',
-        '.nav--type-link.is--professionel[aria-current="page"]'
-      ].join(",")
-    );
-
-    if (professionalTypeLink) {
-      return "professional";
-    }
-
-    const particulierTypeLink = document.querySelector(
-      [
-        ".nav--type-link.is--particulier.w--current",
-        '.nav--type-link.is--particulier[aria-current="page"]'
-      ].join(",")
-    );
-
-    if (particulierTypeLink) {
-      return "particulier";
-    }
+  const getActiveNavbarMenu = () => {
+    const navbarVariant = (
+      navbarElement?.getAttribute(
+        "data-wf--navbar--variant"
+      ) || ""
+    )
+      .trim()
+      .toLowerCase();
 
     /*
-     * 2. Sur une sous-page, on vérifie dans quel
-     * navbar--menu se trouve le lien Webflow courant.
+     * Dans Webflow, la variante professionnelle
+     * est actuellement écrite "professionel".
+     * On accepte aussi "professional" et "professionnel".
      */
-    const professionalMenu = document.querySelector(
-      ".navbar--menu.is--professional"
-    );
+    const isProfessionalNavbar =
+      navbarVariant.includes("profession");
 
-    const particulierMenu = document.querySelector(
-      ".navbar--menu.is--particulier"
-    );
-
-    if (
-      professionalMenu?.querySelector(
-        'a.w--current, a[aria-current="page"]'
-      )
-    ) {
-      return "professional";
+    if (isProfessionalNavbar && professionalMenu) {
+      return professionalMenu;
     }
 
-    if (
-      particulierMenu?.querySelector(
-        'a.w--current, a[aria-current="page"]'
-      )
-    ) {
-      return "particulier";
+    if (particulierMenu) {
+      return particulierMenu;
     }
 
-    /*
-     * 3. Sécurité supplémentaire selon l’URL.
-     */
-    const currentPath = window.location.pathname
-      .toLowerCase()
-      .replace(/\/+$/, "");
-
-    const professionalPathPatterns = [
-      "/professionnel",
-      "/nl/professionnel"
-    ];
-
-    const isProfessionalPath =
-      professionalPathPatterns.some((path) => {
-        return (
-          currentPath === path ||
-          currentPath.startsWith(`${path}/`)
-        );
-      });
-
-    if (isProfessionalPath) {
-      return "professional";
-    }
-
-    return "particulier";
+    return professionalMenu || navbarMenus[0] || null;
   };
 
-  const getCurrentMenu = () => {
-    const navbarType = getCurrentNavbarType();
+  const syncNavbarMenus = (activeMenu = null) => {
+    navbarMenus.forEach((menu) => {
+      const isActive = menu === activeMenu;
 
-    if (navbarType === "professional") {
-      return document.querySelector(
-        ".navbar--menu.is--professional"
-      );
-    }
-
-    return document.querySelector(
-      ".navbar--menu.is--particulier"
-    );
-  };
-
-  const syncMenuVisibility = (activeMenu = null) => {
-    menus.forEach((menu) => {
-      const shouldOpen = menu === activeMenu;
-
-      menu.classList.toggle("is-open", shouldOpen);
+      menu.classList.toggle("is-open", isActive);
       menu.setAttribute(
         "aria-hidden",
-        shouldOpen ? "false" : "true"
+        isActive ? "false" : "true"
       );
     });
   };
@@ -333,7 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const unlockPageScroll = () => {
-    const wasLocked =
+    const wasNavOpen =
       html.classList.contains("nav-open") ||
       body.classList.contains("is-nav-open");
 
@@ -352,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
     body.style.width = "";
     body.style.paddingRight = "";
 
-    if (wasLocked) {
+    if (wasNavOpen) {
       window.scrollTo(0, scrollPosition);
     }
   };
@@ -376,11 +309,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const openMenu = () => {
     if (!isMobile()) return;
 
-    const currentMenu = getCurrentMenu();
+    const activeMenu = getActiveNavbarMenu();
 
-    if (!currentMenu) return;
+    if (!activeMenu) return;
 
-    syncMenuVisibility(currentMenu);
+    syncNavbarMenus(activeMenu);
     lockPageScroll();
 
     if (navbarTop) {
@@ -389,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const closeMenu = () => {
-    syncMenuVisibility();
+    syncNavbarMenus();
     closeAllDropdowns();
     unlockPageScroll();
 
@@ -398,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  if (menuTrigger && menus.length) {
+  if (menuTrigger && navbarMenus.length) {
     menuTrigger.setAttribute("aria-expanded", "false");
 
     menuTrigger.addEventListener("click", (event) => {
