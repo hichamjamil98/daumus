@@ -198,43 +198,83 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getCurrentNavbarType = () => {
-    const currentTypeLink = document.querySelector(
+    /*
+     * 1. Source principale : le sélecteur
+     * Particulier / Professionnel actif dans Webflow.
+     */
+    const professionalTypeLink = document.querySelector(
       [
-        ".nav--type-link.w--current",
-        '.nav--type-link[aria-current="page"]'
+        ".nav--type-link.is--professional.w--current",
+        ".nav--type-link.is--professionel.w--current",
+        '.nav--type-link.is--professional[aria-current="page"]',
+        '.nav--type-link.is--professionel[aria-current="page"]'
       ].join(",")
     );
 
-    if (currentTypeLink) {
-      if (
-        currentTypeLink.classList.contains("is--professional") ||
-        currentTypeLink.classList.contains("is--professionel")
-      ) {
-        return "professional";
-      }
-
-      if (
-        currentTypeLink.classList.contains("is--particulier")
-      ) {
-        return "particulier";
-      }
-
-      const currentHref = (
-        currentTypeLink.getAttribute("href") || ""
-      ).toLowerCase();
-
-      if (currentHref.includes("professionnel")) {
-        return "professional";
-      }
+    if (professionalTypeLink) {
+      return "professional";
     }
 
-    const currentPath = window.location.pathname.toLowerCase();
+    const particulierTypeLink = document.querySelector(
+      [
+        ".nav--type-link.is--particulier.w--current",
+        '.nav--type-link.is--particulier[aria-current="page"]'
+      ].join(",")
+    );
+
+    if (particulierTypeLink) {
+      return "particulier";
+    }
+
+    /*
+     * 2. Sur une sous-page, on vérifie dans quel
+     * navbar--menu se trouve le lien Webflow courant.
+     */
+    const professionalMenu = document.querySelector(
+      ".navbar--menu.is--professional"
+    );
+
+    const particulierMenu = document.querySelector(
+      ".navbar--menu.is--particulier"
+    );
 
     if (
-      currentPath === "/professionnel" ||
-      currentPath.startsWith("/professionnel/") ||
-      currentPath.includes("/nl/professionnel")
+      professionalMenu?.querySelector(
+        'a.w--current, a[aria-current="page"]'
+      )
     ) {
+      return "professional";
+    }
+
+    if (
+      particulierMenu?.querySelector(
+        'a.w--current, a[aria-current="page"]'
+      )
+    ) {
+      return "particulier";
+    }
+
+    /*
+     * 3. Sécurité supplémentaire selon l’URL.
+     */
+    const currentPath = window.location.pathname
+      .toLowerCase()
+      .replace(/\/+$/, "");
+
+    const professionalPathPatterns = [
+      "/professionnel",
+      "/nl/professionnel"
+    ];
+
+    const isProfessionalPath =
+      professionalPathPatterns.some((path) => {
+        return (
+          currentPath === path ||
+          currentPath.startsWith(`${path}/`)
+        );
+      });
+
+    if (isProfessionalPath) {
       return "professional";
     }
 
