@@ -181,8 +181,14 @@ document.addEventListener("DOMContentLoaded", () => {
      MOBILE / TABLET HAMBURGER
   =============================== */
 
-  const menuTrigger = document.querySelector(".navbar-menu-trigger");
-  const menu = document.querySelector(".navbar--menu");
+  const menuTriggers = Array.from(
+    document.querySelectorAll(".navbar-menu-trigger")
+  );
+
+  const menus = Array.from(
+    document.querySelectorAll(".navbar--menu")
+  );
+
   const navbarTop = document.querySelector(".navbar--top");
 
   let scrollPosition = 0;
@@ -239,45 +245,121 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   };
 
-  const openMenu = () => {
-    if (!isMobile()) return;
-
-    if (menu) {
-      menu.classList.add("is-open");
+  const getMenuType = (element) => {
+    if (element.classList.contains("is--professional")) {
+      return "professional";
     }
 
-    lockPageScroll();
-
-    if (navbarTop) {
-      navbarTop.setAttribute("aria-hidden", "true");
+    if (element.classList.contains("is--particulier")) {
+      return "particulier";
     }
+
+    return "default";
+  };
+
+  const getMenuByType = (type) => {
+    if (type === "professional") {
+      return document.querySelector(
+        ".navbar--menu.is--professional"
+      );
+    }
+
+    if (type === "particulier") {
+      return document.querySelector(
+        ".navbar--menu.is--particulier"
+      );
+    }
+
+    return document.querySelector(
+      ".navbar--menu:not(.is--professional):not(.is--particulier)"
+    );
   };
 
   const closeMenu = () => {
-    if (menu) {
+    menus.forEach((menu) => {
       menu.classList.remove("is-open");
-    }
+      menu.setAttribute("aria-hidden", "true");
+    });
+
+    menuTriggers.forEach((trigger) => {
+      trigger.classList.remove("is-open");
+      trigger.setAttribute("aria-expanded", "false");
+    });
 
     closeAllDropdowns();
-    unlockPageScroll();
+
+    if (
+      html.classList.contains("nav-open") ||
+      body.classList.contains("is-nav-open")
+    ) {
+      unlockPageScroll();
+    }
 
     if (navbarTop) {
       navbarTop.removeAttribute("aria-hidden");
     }
   };
 
-  if (menuTrigger && menu) {
-    menuTrigger.addEventListener("click", (event) => {
+  const openMenu = (menu, activeTrigger) => {
+    if (!isMobile() || !menu) return;
+
+    menus.forEach((currentMenu) => {
+      const isActiveMenu = currentMenu === menu;
+
+      currentMenu.classList.toggle("is-open", isActiveMenu);
+      currentMenu.setAttribute(
+        "aria-hidden",
+        isActiveMenu ? "false" : "true"
+      );
+    });
+
+    menuTriggers.forEach((trigger) => {
+      const isActiveTrigger = trigger === activeTrigger;
+
+      trigger.classList.toggle("is-open", isActiveTrigger);
+      trigger.setAttribute(
+        "aria-expanded",
+        isActiveTrigger ? "true" : "false"
+      );
+    });
+
+    if (!html.classList.contains("nav-open")) {
+      lockPageScroll();
+    }
+
+    if (navbarTop) {
+      navbarTop.setAttribute("aria-hidden", "true");
+    }
+  };
+
+  menuTriggers.forEach((trigger) => {
+    trigger.setAttribute("aria-expanded", "false");
+
+    trigger.addEventListener("click", (event) => {
+      if (!isMobile()) return;
+
       event.preventDefault();
       event.stopPropagation();
 
-      if (html.classList.contains("nav-open")) {
+      const menuType = getMenuType(trigger);
+      const relatedMenu = getMenuByType(menuType);
+
+      if (!relatedMenu) return;
+
+      const isCurrentMenuOpen =
+        relatedMenu.classList.contains("is-open");
+
+      if (isCurrentMenuOpen) {
         closeMenu();
       } else {
-        openMenu();
+        openMenu(relatedMenu, trigger);
       }
     });
-  }
+  });
+
+  menus.forEach((menu) => {
+    menu.setAttribute("aria-hidden", "true");
+  });
 
   window.addEventListener("resize", () => {
     setNavbarHeight();
