@@ -478,13 +478,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ==========================================================================
-   FIL D’ARIANE
+   FIL D’ARIANE — FR / NL
 ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-  const breadcrumbWrapper = document.querySelector(
-    ".arianne--wrapper"
-  );
+  const breadcrumbWrapper = document.querySelector(".arianne--wrapper");
 
   if (!breadcrumbWrapper) return;
 
@@ -494,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const normalized = path
       .split("?")[0]
       .split("#")[0]
-      .replace(/\/+/g, "/")
+      .replace(/\/{2,}/g, "/")
       .replace(/\/$/, "");
 
     return normalized || "/";
@@ -506,11 +504,102 @@ document.addEventListener("DOMContentLoaded", () => {
       .trim();
   }
 
+  function getCurrentLanguage() {
+    const htmlLanguage = (
+      document.documentElement.getAttribute("lang") || ""
+    )
+      .trim()
+      .toLowerCase()
+      .split("-")[0];
+
+    if (htmlLanguage === "nl") return "nl";
+    if (htmlLanguage === "fr") return "fr";
+
+    const pathSegments = window.location.pathname
+      .toLowerCase()
+      .split("/")
+      .filter(Boolean);
+
+    return pathSegments[0] === "nl" ? "nl" : "fr";
+  }
+
+  const currentLanguage = getCurrentLanguage();
   const currentPath = normalizePath(window.location.pathname);
+
+  const languageTexts = {
+    fr: {
+      home: "Accueil",
+      breadcrumbLabel: "Fil d’Ariane"
+    },
+    nl: {
+      home: "Home",
+      breadcrumbLabel: "Broodkruimel"
+    }
+  }[currentLanguage];
+
+  const homeHref = currentLanguage === "nl" ? "/nl" : "/";
+
+  function isHomePage() {
+    return currentPath === "/" || currentPath === "/nl";
+  }
+
+  function isValidLink(link) {
+    if (!link) return false;
+
+    const href = link.getAttribute("href");
+
+    return Boolean(
+      href &&
+      href !== "#" &&
+      !href.startsWith("mailto:") &&
+      !href.startsWith("tel:") &&
+      !href.startsWith("javascript:")
+    );
+  }
+
+  function getLinkPath(link) {
+    if (!isValidLink(link)) return null;
+
+    try {
+      return normalizePath(
+        new URL(link.href, window.location.origin).pathname
+      );
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function isLinkInCurrentLanguage(link) {
+    const linkPath = getLinkPath(link);
+
+    if (!linkPath) return false;
+
+    const isDutchPath =
+      linkPath === "/nl" || linkPath.startsWith("/nl/");
+
+    return currentLanguage === "nl"
+      ? isDutchPath
+      : !isDutchPath;
+  }
+
+  function isElementVisible(element) {
+    if (!element) return false;
+
+    if (
+      element.hidden ||
+      element.getAttribute("aria-hidden") === "true" ||
+      element.classList.contains("is--language-hidden")
+    ) {
+      return false;
+    }
+
+    return !element.closest(
+      '[aria-hidden="true"], .is--language-hidden'
+    );
+  }
 
   function createSeparator() {
     const namespace = "http://www.w3.org/2000/svg";
-
     const svg = document.createElementNS(namespace, "svg");
 
     svg.setAttribute("xmlns", namespace);
@@ -526,7 +615,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "d",
       "M2.75 0L2 0.75L5.25 4L2 7.25L2.75 8L6.75 4L2.75 0Z"
     );
-
     path.setAttribute("fill", "currentColor");
 
     svg.appendChild(path);
@@ -554,44 +642,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return current;
   }
 
+  function appendBreadcrumbItem(element, addSeparatorBefore) {
+    if (addSeparatorBefore) {
+      breadcrumbWrapper.appendChild(createSeparator());
+    }
+
+    breadcrumbWrapper.appendChild(element);
+  }
+
   function findCurrentNavigationLink() {
     const navigationLinks = Array.from(
       document.querySelectorAll(
-        [
-          ".navbar a[href]",
-          ".footer a[href]"
-        ].join(",")
+        ".navbar a[href], .footer a[href]"
       )
     );
 
-    return navigationLinks.find((link) => {
-      const href = link.getAttribute("href");
-
-      if (
-        !href ||
-        href === "#" ||
-        href.startsWith("mailto:") ||
-        href.startsWith("tel:") ||
-        href.startsWith("javascript:")
-      ) {
-        return false;
-      }
-
-      let linkPath;
-
-      try {
-        linkPath = normalizePath(
-          new URL(
-            link.href,
-            window.location.origin
-          ).pathname
-        );
-      } catch (error) {
-        return false;
-      }
-
-      return linkPath === currentPath;
+    const matchingLinks = navigationLinks.filter((link) => {
+      return (
+        isValidLink(link) &&
+        getLinkPath(link) === currentPath &&
+        isLinkInCurrentLanguage(link)
+      );
     });
+
+    return (
+      matchingLinks.find(isElementVisible) ||
+      matchingLinks[0] ||
+      null
+    );
   }
 
   function getCurrentPageName(currentNavigationLink) {
@@ -600,19 +678,29 @@ document.addEventListener("DOMContentLoaded", () => {
         currentNavigationLink.textContent
       );
 
-      if (navigationLabel) {
-        return navigationLabel;
-      }
+      if (navigationLabel) return navigationLabel;
     }
 
-    const pageHeading = document.querySelector("main h1");
+    const explicitBreadcrumbName = document.querySelector(
+      "[data-breadcrumb-name]"
+    );
+
+    if (explicitBreadcrumbName) {
+      const explicitName = cleanText(
+        explicitBreadcrumbName.getAttribute(
+          "data-breadcrumb-name"
+        )
+      );
+
+      if (explicitName) return explicitName;
+    }
+
+    const pageHeading = document.querySelector("main h1, h1");
 
     if (pageHeading) {
       const headingText = cleanText(pageHeading.textContent);
 
-      if (headingText) {
-        return headingText;
-      }
+      if (headingText) return headingText;
     }
 
     const documentTitle = cleanText(
@@ -622,32 +710,15 @@ document.addEventListener("DOMContentLoaded", () => {
         .split("—")[0]
     );
 
-    if (documentTitle) {
-      return documentTitle;
-    }
+    if (documentTitle) return documentTitle;
 
-    const currentSlug = currentPath
-      .split("/")
-      .filter(Boolean)
-      .pop();
-
-    if (currentSlug) {
-      return currentSlug
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, (letter) => {
-          return letter.toUpperCase();
-        });
-    }
-
-    return "Accueil";
+    return currentLanguage === "nl" ? "Pagina" : "Page";
   }
 
   function getDropdownParent(currentNavigationLink) {
     if (!currentNavigationLink) return null;
 
-    const dropdown = currentNavigationLink.closest(
-      ".nav--dropdown"
-    );
+    const dropdown = currentNavigationLink.closest(".nav--dropdown");
 
     if (!dropdown) return null;
 
@@ -661,41 +732,28 @@ document.addEventListener("DOMContentLoaded", () => {
       dropdownTrigger = Array.from(dropdown.children).find(
         (child) =>
           child.classList &&
-          child.classList.contains(
-            "nav--dropdown-trigger"
-          )
+          child.classList.contains("nav--dropdown-trigger")
       );
     }
 
-    if (!dropdownTrigger) return null;
-
-    const parentHref = dropdownTrigger.getAttribute("href");
-    const parentLabel = cleanText(
-      dropdownTrigger.textContent
-    );
-
     if (
-      !parentHref ||
-      parentHref === "#" ||
-      !parentLabel
+      !dropdownTrigger ||
+      !isValidLink(dropdownTrigger) ||
+      !isLinkInCurrentLanguage(dropdownTrigger)
     ) {
       return null;
     }
 
-    let parentPath;
+    const parentLabel = cleanText(
+      dropdownTrigger.textContent
+    );
+    const parentPath = getLinkPath(dropdownTrigger);
 
-    try {
-      parentPath = normalizePath(
-        new URL(
-          parentHref,
-          window.location.origin
-        ).pathname
-      );
-    } catch (error) {
-      return null;
-    }
-
-    if (parentPath === currentPath) {
+    if (
+      !parentLabel ||
+      !parentPath ||
+      parentPath === currentPath
+    ) {
       return null;
     }
 
@@ -705,36 +763,21 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  function appendBreadcrumbItem(
-    element,
-    addSeparatorBefore
-  ) {
-    if (addSeparatorBefore) {
-      breadcrumbWrapper.appendChild(
-        createSeparator()
-      );
-    }
-
-    breadcrumbWrapper.appendChild(element);
-  }
-
   function buildBreadcrumb() {
     const currentNavigationLink =
       findCurrentNavigationLink();
-
     const currentPageName =
       getCurrentPageName(currentNavigationLink);
-
     const dropdownParent =
       getDropdownParent(currentNavigationLink);
 
     const items = [];
 
-    if (currentPath !== "/") {
+    if (!isHomePage()) {
       items.push({
         type: "link",
-        label: "Accueil",
-        href: "/"
+        label: languageTexts.home,
+        href: homeHref
       });
     }
 
@@ -754,22 +797,16 @@ document.addEventListener("DOMContentLoaded", () => {
     breadcrumbWrapper.innerHTML = "";
     breadcrumbWrapper.setAttribute(
       "aria-label",
-      "Fil d’Ariane"
+      languageTexts.breadcrumbLabel
     );
 
     items.forEach((item, index) => {
       const element =
         item.type === "current"
           ? createCurrentPage(item.label)
-          : createBreadcrumbLink(
-              item.label,
-              item.href
-            );
+          : createBreadcrumbLink(item.label, item.href);
 
-      appendBreadcrumbItem(
-        element,
-        index > 0
-      );
+      appendBreadcrumbItem(element, index > 0);
     });
   }
 
