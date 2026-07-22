@@ -182,13 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
   =============================== */
 
   const menuTrigger = document.querySelector(".navbar-menu-trigger");
-  const navbarElement = document.querySelector(".navbar");
-  const professionalMenu = document.querySelector(
-    ".navbar--menu.is--professional"
-  );
-  const particulierMenu = document.querySelector(
-    ".navbar--menu.is--particulier"
-  );
   const navbarMenus = Array.from(
     document.querySelectorAll(".navbar--menu")
   );
@@ -201,43 +194,36 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const getActiveNavbarMenu = () => {
+    if (!navbarMenus.length) return null;
+
     const navbarVariant = (
-      navbarElement?.getAttribute(
-        "data-wf--navbar--variant"
-      ) || ""
+      navbar?.getAttribute("data-wf--navbar--variant") || ""
     )
       .trim()
       .toLowerCase();
 
-    /*
-     * Dans Webflow, la variante professionnelle
-     * est actuellement écrite "professionel".
-     * On accepte aussi "professional" et "professionnel".
-     */
-    const isProfessionalNavbar =
-      navbarVariant.includes("profession");
+    const professionalLink = document.querySelector(
+      ".nav--type-link.is--professionel"
+    );
 
-    if (isProfessionalNavbar && professionalMenu) {
-      return professionalMenu;
-    }
+    const isProfessionalPage =
+      navbarVariant.includes("profession") ||
+      professionalLink?.classList.contains("w--current") ||
+      professionalLink?.getAttribute("aria-current") === "page";
 
-    if (particulierMenu) {
-      return particulierMenu;
-    }
-
-    return professionalMenu || navbarMenus[0] || null;
-  };
-
-  const syncNavbarMenus = (activeMenu = null) => {
-    navbarMenus.forEach((menu) => {
-      const isActive = menu === activeMenu;
-
-      menu.classList.toggle("is-open", isActive);
-      menu.setAttribute(
-        "aria-hidden",
-        isActive ? "false" : "true"
+    if (isProfessionalPage) {
+      return (
+        document.querySelector(
+          ".navbar--menu.is--professional"
+        ) || navbarMenus[0]
       );
-    });
+    }
+
+    return (
+      document.querySelector(
+        ".navbar--menu.is--particulier"
+      ) || navbarMenus[0]
+    );
   };
 
   const lockPageScroll = () => {
@@ -258,25 +244,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     html.classList.add("nav-open");
     body.classList.add("is-nav-open");
-
-    if (menuTrigger) {
-      menuTrigger.classList.add("is-open");
-      menuTrigger.setAttribute("aria-expanded", "true");
-    }
   };
 
   const unlockPageScroll = () => {
-    const wasNavOpen =
-      html.classList.contains("nav-open") ||
-      body.classList.contains("is-nav-open");
-
     html.classList.remove("nav-open");
     body.classList.remove("is-nav-open");
-
-    if (menuTrigger) {
-      menuTrigger.classList.remove("is-open");
-      menuTrigger.setAttribute("aria-expanded", "false");
-    }
 
     body.style.position = "";
     body.style.top = "";
@@ -285,9 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
     body.style.width = "";
     body.style.paddingRight = "";
 
-    if (wasNavOpen) {
-      window.scrollTo(0, scrollPosition);
-    }
+    window.scrollTo(0, scrollPosition);
   };
 
   const closeAllDropdowns = () => {
@@ -306,6 +276,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   };
 
+  const resetNavbarMenuStyles = (currentMenu) => {
+    currentMenu.style.display = "";
+    currentMenu.style.visibility = "";
+    currentMenu.style.opacity = "";
+    currentMenu.style.pointerEvents = "";
+  };
+
   const openMenu = () => {
     if (!isMobile()) return;
 
@@ -313,7 +290,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!activeMenu) return;
 
-    syncNavbarMenus(activeMenu);
+    navbarMenus.forEach((currentMenu) => {
+      const shouldOpen = currentMenu === activeMenu;
+
+      currentMenu.classList.toggle(
+        "is-open",
+        shouldOpen
+      );
+
+      currentMenu.setAttribute(
+        "aria-hidden",
+        shouldOpen ? "false" : "true"
+      );
+
+      if (shouldOpen) {
+        currentMenu.style.display = "flex";
+        currentMenu.style.visibility = "visible";
+        currentMenu.style.opacity = "1";
+        currentMenu.style.pointerEvents = "auto";
+      } else {
+        currentMenu.style.display = "none";
+        currentMenu.style.visibility = "hidden";
+        currentMenu.style.opacity = "0";
+        currentMenu.style.pointerEvents = "none";
+      }
+    });
+
+    if (menuTrigger) {
+      menuTrigger.classList.add("is-open");
+      menuTrigger.setAttribute(
+        "aria-expanded",
+        "true"
+      );
+    }
+
     lockPageScroll();
 
     if (navbarTop) {
@@ -322,9 +332,28 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const closeMenu = () => {
-    syncNavbarMenus();
+    navbarMenus.forEach((currentMenu) => {
+      currentMenu.classList.remove("is-open");
+      currentMenu.setAttribute("aria-hidden", "true");
+      resetNavbarMenuStyles(currentMenu);
+    });
+
+    if (menuTrigger) {
+      menuTrigger.classList.remove("is-open");
+      menuTrigger.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+    }
+
     closeAllDropdowns();
-    unlockPageScroll();
+
+    if (
+      html.classList.contains("nav-open") ||
+      body.classList.contains("is-nav-open")
+    ) {
+      unlockPageScroll();
+    }
 
     if (navbarTop) {
       navbarTop.removeAttribute("aria-hidden");
@@ -335,8 +364,6 @@ document.addEventListener("DOMContentLoaded", () => {
     menuTrigger.setAttribute("aria-expanded", "false");
 
     menuTrigger.addEventListener("click", (event) => {
-      if (!isMobile()) return;
-
       event.preventDefault();
       event.stopPropagation();
 
