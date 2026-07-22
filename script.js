@@ -181,8 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
      MOBILE / TABLET HAMBURGER
   =============================== */
 
-  const menuTriggers = Array.from(
-    document.querySelectorAll(".navbar-menu-trigger")
+  const menuTrigger = document.querySelector(
+    ".navbar-menu-trigger"
   );
 
   const menus = Array.from(
@@ -195,6 +195,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const getScrollbarWidth = () => {
     return window.innerWidth - document.documentElement.clientWidth;
+  };
+
+  const getCurrentNavbarType = () => {
+    const currentTypeLink = document.querySelector(
+      [
+        ".nav--type-link.w--current",
+        '.nav--type-link[aria-current="page"]'
+      ].join(",")
+    );
+
+    if (currentTypeLink) {
+      if (
+        currentTypeLink.classList.contains("is--professional") ||
+        currentTypeLink.classList.contains("is--professionel")
+      ) {
+        return "professional";
+      }
+
+      if (
+        currentTypeLink.classList.contains("is--particulier")
+      ) {
+        return "particulier";
+      }
+
+      const currentHref = (
+        currentTypeLink.getAttribute("href") || ""
+      ).toLowerCase();
+
+      if (currentHref.includes("professionnel")) {
+        return "professional";
+      }
+    }
+
+    const currentPath = window.location.pathname.toLowerCase();
+
+    if (
+      currentPath === "/professionnel" ||
+      currentPath.startsWith("/professionnel/") ||
+      currentPath.includes("/nl/professionnel")
+    ) {
+      return "professional";
+    }
+
+    return "particulier";
+  };
+
+  const getCurrentMenu = () => {
+    const navbarType = getCurrentNavbarType();
+
+    if (navbarType === "professional") {
+      return document.querySelector(
+        ".navbar--menu.is--professional"
+      );
+    }
+
+    return document.querySelector(
+      ".navbar--menu.is--particulier"
+    );
+  };
+
+  const syncMenuVisibility = (activeMenu = null) => {
+    menus.forEach((menu) => {
+      const shouldOpen = menu === activeMenu;
+
+      menu.classList.toggle("is-open", shouldOpen);
+      menu.setAttribute(
+        "aria-hidden",
+        shouldOpen ? "false" : "true"
+      );
+    });
   };
 
   const lockPageScroll = () => {
@@ -215,11 +285,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     html.classList.add("nav-open");
     body.classList.add("is-nav-open");
+
+    if (menuTrigger) {
+      menuTrigger.classList.add("is-open");
+      menuTrigger.setAttribute("aria-expanded", "true");
+    }
   };
 
   const unlockPageScroll = () => {
+    const wasLocked =
+      html.classList.contains("nav-open") ||
+      body.classList.contains("is-nav-open");
+
     html.classList.remove("nav-open");
     body.classList.remove("is-nav-open");
+
+    if (menuTrigger) {
+      menuTrigger.classList.remove("is-open");
+      menuTrigger.setAttribute("aria-expanded", "false");
+    }
 
     body.style.position = "";
     body.style.top = "";
@@ -228,14 +312,18 @@ document.addEventListener("DOMContentLoaded", () => {
     body.style.width = "";
     body.style.paddingRight = "";
 
-    window.scrollTo(0, scrollPosition);
+    if (wasLocked) {
+      window.scrollTo(0, scrollPosition);
+    }
   };
 
   const closeAllDropdowns = () => {
     document
       .querySelectorAll(".nav--dropdown.is-open")
       .forEach((dropdown) => {
-        const list = dropdown.querySelector(".nav--dropdown-list");
+        const list = dropdown.querySelector(
+          ".nav--dropdown-list"
+        );
 
         dropdown.classList.remove("is-open");
 
@@ -245,121 +333,47 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   };
 
-  const getMenuType = (element) => {
-    if (element.classList.contains("is--professional")) {
-      return "professional";
-    }
+  const openMenu = () => {
+    if (!isMobile()) return;
 
-    if (element.classList.contains("is--particulier")) {
-      return "particulier";
-    }
+    const currentMenu = getCurrentMenu();
 
-    return "default";
-  };
+    if (!currentMenu) return;
 
-  const getMenuByType = (type) => {
-    if (type === "professional") {
-      return document.querySelector(
-        ".navbar--menu.is--professional"
-      );
-    }
-
-    if (type === "particulier") {
-      return document.querySelector(
-        ".navbar--menu.is--particulier"
-      );
-    }
-
-    return document.querySelector(
-      ".navbar--menu:not(.is--professional):not(.is--particulier)"
-    );
-  };
-
-  const closeMenu = () => {
-    menus.forEach((menu) => {
-      menu.classList.remove("is-open");
-      menu.setAttribute("aria-hidden", "true");
-    });
-
-    menuTriggers.forEach((trigger) => {
-      trigger.classList.remove("is-open");
-      trigger.setAttribute("aria-expanded", "false");
-    });
-
-    closeAllDropdowns();
-
-    if (
-      html.classList.contains("nav-open") ||
-      body.classList.contains("is-nav-open")
-    ) {
-      unlockPageScroll();
-    }
-
-    if (navbarTop) {
-      navbarTop.removeAttribute("aria-hidden");
-    }
-  };
-
-  const openMenu = (menu, activeTrigger) => {
-    if (!isMobile() || !menu) return;
-
-    menus.forEach((currentMenu) => {
-      const isActiveMenu = currentMenu === menu;
-
-      currentMenu.classList.toggle("is-open", isActiveMenu);
-      currentMenu.setAttribute(
-        "aria-hidden",
-        isActiveMenu ? "false" : "true"
-      );
-    });
-
-    menuTriggers.forEach((trigger) => {
-      const isActiveTrigger = trigger === activeTrigger;
-
-      trigger.classList.toggle("is-open", isActiveTrigger);
-      trigger.setAttribute(
-        "aria-expanded",
-        isActiveTrigger ? "true" : "false"
-      );
-    });
-
-    if (!html.classList.contains("nav-open")) {
-      lockPageScroll();
-    }
+    syncMenuVisibility(currentMenu);
+    lockPageScroll();
 
     if (navbarTop) {
       navbarTop.setAttribute("aria-hidden", "true");
     }
   };
 
-  menuTriggers.forEach((trigger) => {
-    trigger.setAttribute("aria-expanded", "false");
+  const closeMenu = () => {
+    syncMenuVisibility();
+    closeAllDropdowns();
+    unlockPageScroll();
 
-    trigger.addEventListener("click", (event) => {
+    if (navbarTop) {
+      navbarTop.removeAttribute("aria-hidden");
+    }
+  };
+
+  if (menuTrigger && menus.length) {
+    menuTrigger.setAttribute("aria-expanded", "false");
+
+    menuTrigger.addEventListener("click", (event) => {
       if (!isMobile()) return;
 
       event.preventDefault();
       event.stopPropagation();
 
-      const menuType = getMenuType(trigger);
-      const relatedMenu = getMenuByType(menuType);
-
-      if (!relatedMenu) return;
-
-      const isCurrentMenuOpen =
-        relatedMenu.classList.contains("is-open");
-
-      if (isCurrentMenuOpen) {
+      if (html.classList.contains("nav-open")) {
         closeMenu();
       } else {
-        openMenu(relatedMenu, trigger);
+        openMenu();
       }
     });
-  });
-
-  menus.forEach((menu) => {
-    menu.setAttribute("aria-hidden", "true");
-  });
+  }
 
   window.addEventListener("resize", () => {
     setNavbarHeight();
