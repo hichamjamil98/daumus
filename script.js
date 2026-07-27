@@ -1291,44 +1291,71 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 /* ==========================================================================
    BACK TO TOP
-   Affiche le bouton après 30% de scroll
-   Retour en haut avec scroll fluide
+   Apparition après 30% de scroll
+   Retour fluide vers le haut
 ========================================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-  const backTopButton = document.querySelector(".back--top");
+(() => {
+  const initBackToTop = () => {
+    const backTopButtons = document.querySelectorAll(".back--top");
 
-  if (!backTopButton) return;
+    if (!backTopButtons.length) return;
 
-  const updateBackTopButton = () => {
-    const scrollableHeight =
-      document.documentElement.scrollHeight - window.innerHeight;
+    const updateBackTopButtons = () => {
+      const documentHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.body.clientHeight,
+        document.documentElement.clientHeight
+      );
 
-    const scrollPercentage =
-      scrollableHeight > 0
-        ? (window.scrollY / scrollableHeight) * 100
-        : 0;
+      const scrollableHeight = documentHeight - window.innerHeight;
 
-    backTopButton.classList.toggle(
-      "is--visible",
-      scrollPercentage >= 30
-    );
+      const scrollProgress =
+        scrollableHeight > 0
+          ? window.scrollY / scrollableHeight
+          : 0;
+
+      backTopButtons.forEach((button) => {
+        button.classList.toggle(
+          "is--visible",
+          scrollProgress >= 0.3
+        );
+      });
+    };
+
+    backTopButtons.forEach((button) => {
+      if (button.dataset.backTopInitialized === "true") return;
+
+      button.dataset.backTopInitialized = "true";
+
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth"
+        });
+      });
+    });
+
+    window.addEventListener("scroll", updateBackTopButtons, {
+      passive: true
+    });
+
+    window.addEventListener("resize", updateBackTopButtons);
+
+    window.addEventListener("load", updateBackTopButtons);
+
+    updateBackTopButtons();
   };
 
-  backTopButton.addEventListener("click", (event) => {
-    event.preventDefault();
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  });
-
-  window.addEventListener("scroll", updateBackTopButton, {
-    passive: true,
-  });
-
-  window.addEventListener("resize", updateBackTopButton);
-
-  updateBackTopButton();
-});
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initBackToTop);
+  } else {
+    initBackToTop();
+  }
+})();
