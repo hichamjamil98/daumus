@@ -1289,3 +1289,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+/* ==========================================================================
+   BACK TO TOP
+   Affiche le bouton après 30% de scroll
+   Retour en haut avec scroll fluide
+========================================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const backTopButton = document.querySelector(".back--top");
+
+  if (!backTopButton) return;
+
+  const updateBackTopButton = () => {
+    const scrollableHeight =
+      document.documentElement.scrollHeight - window.innerHeight;
+
+    const scrollPercentage =
+      scrollableHeight > 0
+        ? (window.scrollY / scrollableHeight) * 100
+        : 0;
+
+    backTopButton.classList.toggle(
+      "is--visible",
+      scrollPercentage >= 30
+    );
+  };
+
+  backTopButton.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  });
+
+  window.addEventListener("scroll", updateBackTopButton, {
+    passive: true,
+  });
+
+  window.addEventListener("resize", updateBackTopButton);
+
+  updateBackTopButton();
+});

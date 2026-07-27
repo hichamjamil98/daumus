@@ -744,3 +744,25 @@ html.wf-design-mode body [lang^="nl-"] {
     pointer-events: auto !important;
   }
 }
+/* ==========================================================================
+   BACK TO TOP
+   Bouton retour en haut
+========================================================================== */
+
+.back--top {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(0.75rem);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease,
+    visibility 0.35s ease;
+}
+
+.back--top.is--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
