@@ -1359,3 +1359,95 @@ document.addEventListener("DOMContentLoaded", () => {
     initBackToTop();
   }
 })();
+
+/* =========================================================
+   DAUMUS — DYNAMIC TEXT COLOR TAGS
+   ---------------------------------------------------------
+   Converts custom text markers into colored spans.
+
+   <orange>Text<orange>       → Orange
+   <smoke>Text<smoke>         → Smoke
+   <grey>Text<grey>           → Grey
+   <text-grey>Text<text-grey> → Grey
+   ========================================================= */
+
+   document.addEventListener("DOMContentLoaded", function () {
+
+    const replacements = [
+      {
+        tag: "orange",
+        className: "text-orange"
+      },
+      {
+        tag: "smoke",
+        className: "text-smoke"
+      },
+      {
+        tag: "grey",
+        className: "text-grey"
+      },
+      {
+        tag: "text-grey",
+        className: "text-grey"
+      }
+    ];
+  
+    // Traverse all text nodes on the page
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT
+    );
+  
+    const textNodes = [];
+  
+    while (walker.nextNode()) {
+      textNodes.push(walker.currentNode);
+    }
+  
+    textNodes.forEach((node) => {
+  
+      // Ignore scripts, styles and noscript elements
+      if (
+        node.parentElement &&
+        ["SCRIPT", "STYLE", "NOSCRIPT"].includes(node.parentElement.tagName)
+      ) {
+        return;
+      }
+  
+      let html = node.textContent;
+      let modified = false;
+  
+      replacements.forEach(({ tag, className }) => {
+  
+        const escapedTag = tag.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&"
+        );
+  
+        const regex = new RegExp(
+          `<${escapedTag}>(.*?)<${escapedTag}>`,
+          "gi"
+        );
+  
+        if (regex.test(html)) {
+          regex.lastIndex = 0;
+  
+          html = html.replace(
+            regex,
+            `<span class="${className}">$1</span>`
+          );
+  
+          modified = true;
+        }
+      });
+  
+      if (modified) {
+        const wrapper = document.createElement("span");
+        wrapper.innerHTML = html;
+  
+        node.replaceWith(...wrapper.childNodes);
+      }
+  
+    });
+  
+  });
