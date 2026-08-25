@@ -1359,32 +1359,21 @@ document.addEventListener("DOMContentLoaded", () => {
     initBackToTop();
   }
 })();
-
 /* =========================================================
-   DAUMUS — DYNAMIC TEXT COLOR TAGS
-   ---------------------------------------------------------
-   Converts custom text markers into colored spans.
-
-   <orange>Text<orange>       → Orange
-   <smoke>Text<smoke>         → Smoke
-   <grey>Text<grey>           → Grey
-   <text-grey>Text<text-grey> → Grey
+   DAUMUS — GLOBAL TEXT COLOR TAGS
+   Works with headings, paragraphs, rich text, CMS, etc.
    ========================================================= */
 
    document.addEventListener("DOMContentLoaded", function () {
 
     const replacements = [
       {
-        tag: "orange",
+        tag: "text-orange",
         className: "text-orange"
       },
       {
-        tag: "smoke",
+        tag: "text-smoke",
         className: "text-smoke"
-      },
-      {
-        tag: "grey",
-        className: "text-grey"
       },
       {
         tag: "text-grey",
@@ -1392,7 +1381,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     ];
   
-    // Traverse all text nodes on the page
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT
@@ -1406,33 +1394,34 @@ document.addEventListener("DOMContentLoaded", () => {
   
     textNodes.forEach((node) => {
   
-      // Ignore scripts, styles and noscript elements
       if (
-        node.parentElement &&
+        !node.parentElement ||
         ["SCRIPT", "STYLE", "NOSCRIPT"].includes(node.parentElement.tagName)
       ) {
         return;
       }
   
-      let html = node.textContent;
+      let content = node.textContent;
       let modified = false;
   
       replacements.forEach(({ tag, className }) => {
   
-        const escapedTag = tag.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          "\\$&"
-        );
+        const escapedTag = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  
+        // Supporte :
+        // <text-orange>texte</text-orange>
+        // ET
+        // <text-orange>texte<text-orange>
   
         const regex = new RegExp(
-          `<${escapedTag}>(.*?)<${escapedTag}>`,
+          `<${escapedTag}>(.*?)<\\/?${escapedTag}>`,
           "gi"
         );
   
-        if (regex.test(html)) {
+        if (regex.test(content)) {
           regex.lastIndex = 0;
   
-          html = html.replace(
+          content = content.replace(
             regex,
             `<span class="${className}">$1</span>`
           );
@@ -1443,7 +1432,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
       if (modified) {
         const wrapper = document.createElement("span");
-        wrapper.innerHTML = html;
+        wrapper.innerHTML = content;
   
         node.replaceWith(...wrapper.childNodes);
       }
