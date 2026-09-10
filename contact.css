@@ -1,38 +1,59 @@
 /* ==========================================================================
-   PHONE FIELD - INTL TEL INPUT
+   CONTACT FORM
    ========================================================================== */
 
    .form--item {
     position: relative;
   }
   
+  
+  /* ==========================================================================
+     PHONE FIELD — INTL TEL INPUT
+     ========================================================================== */
+  
   .iti {
-    width: 100%;
+    width: 100% !important;
+    display: block !important;
   }
+  
   
   /* ---------- Input ---------- */
   
   .iti__tel-input,
-  .iti input,
-  #Phone {
+  .iti input[type="tel"],
+  #phone,
+  #Telefoon {
     width: 100% !important;
     color: #212121 !important;
   }
   
   .iti__tel-input::placeholder,
-  .iti input::placeholder,
-  #Phone::placeholder {
+  .iti input[type="tel"]::placeholder,
+  #phone::placeholder,
+  #Telefoon::placeholder {
     color: #212121 !important;
     opacity: 1;
   }
   
-  /* ---------- Selected Country ---------- */
+  
+  /* ---------- Country button ---------- */
+  
+  .iti__country-container {
+    z-index: 10;
+  }
   
   .iti__selected-country {
     padding-left: 1rem !important;
     padding-right: 0.75rem !important;
-    border-radius: inherit;
+  
     color: #212121 !important;
+  
+    background: transparent !important;
+  
+    border: none !important;
+    border-radius: inherit;
+  
+    cursor: pointer;
   }
   
   .iti__selected-country-primary,
@@ -40,21 +61,55 @@
     color: #212121 !important;
   }
   
-  /* ---------- Dropdown ---------- */
+  
+  /* ---------- Flag ---------- */
+  
+  .iti__flag {
+    display: inline-block !important;
+  }
+  
+  
+  /* ---------- Arrow ---------- */
+  
+  .iti__arrow {
+    border-top-color: #212121 !important;
+  }
+  
+  
+  /* ==========================================================================
+     COUNTRY DROPDOWN
+     ========================================================================== */
+  
+  .iti__dropdown-content {
+    z-index: 999999 !important;
+  }
   
   .iti__country-list {
-    z-index: 99999 !important;
+    z-index: 999999 !important;
+  
+    color: #212121 !important;
+    background: #ffffff !important;
+  
     border: 1px solid #212121 !important;
     border-radius: 0.75rem !important;
-    overflow: hidden;
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
-    color: #212121 !important;
+  
+    box-shadow:
+      0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
+  
+    overflow-x: hidden;
   }
+  
+  
+  /* ---------- Country row ---------- */
   
   .iti__country {
     padding: 0.75rem 1rem !important;
+  
     font-size: 0.875rem !important;
+  
     color: #212121 !important;
+  
+    cursor: pointer;
   }
   
   .iti__country-name,
@@ -66,36 +121,72 @@
     opacity: 1 !important;
   }
   
-  /* ---------- Search ---------- */
-  
-  .iti__search-input {
-    color: #212121 !important;
-  }
-  
-  .iti__search-input::placeholder {
-    color: #212121 !important;
-    opacity: 1;
-  }
-  
-  /* ---------- Arrow ---------- */
-  
-  .iti__arrow {
-    border-top-color: #212121 !important;
-  }
   
   /* ---------- Hover ---------- */
   
   .iti__country:hover,
   .iti__country.iti__highlight {
     color: #212121 !important;
+    background-color: #f2f2f2 !important;
   }
   
-  /* ---------- Mobile ---------- */
+  
+  /* ==========================================================================
+     SEARCH COUNTRY
+     ========================================================================== */
+  
+  .iti__search-input {
+    width: 100% !important;
+  
+    padding: 0.75rem 1rem !important;
+  
+    color: #212121 !important;
+  
+    background: #ffffff !important;
+  
+    border: none !important;
+    border-bottom:
+      1px solid rgba(33, 33, 33, 0.2) !important;
+  
+    outline: none !important;
+  }
+  
+  .iti__search-input::placeholder {
+    color: #212121 !important;
+    opacity: 0.6;
+  }
+  
+  
+  /* ==========================================================================
+     WEBFLOW / FORM OVERFLOW FIX
+     ========================================================================== */
+  
+  /*
+   * Important pour empêcher le dropdown
+   * d'être coupé par un parent.
+   */
+  
+  .form--contact-parent,
+  .form--content,
+  .form--row,
+  .form-block.is--contact {
+    overflow: visible !important;
+  }
+  
+  
+  /* ==========================================================================
+     MOBILE
+     ========================================================================== */
   
   @media screen and (max-width: 767px) {
-    .iti__country-list {
-      width: calc(100vw - 2rem) !important;
-      max-width: none !important;
-      left: 0 !important;
+  
+    .iti__country-list,
+    .iti__dropdown-content {
+      max-width: calc(100vw - 2rem) !important;
     }
+  
+    .iti__country {
+      white-space: normal;
+    }
+  
   }
