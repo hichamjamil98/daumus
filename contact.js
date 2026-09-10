@@ -1,41 +1,18 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector("#wf-form-Particulier-Form");
-    const phoneInput = document.querySelector("#Phone");
-  
-    if (phoneInput && window.intlTelInput) {
-      const iti = window.intlTelInput(phoneInput, {
-        initialCountry: "be",
-        preferredCountries: ["be", "fr", "ma", "ch", "es"],
-        separateDialCode: true,
-        nationalMode: false,
-        formatAsYouType: true,
-        utilsScript:
-          "https://cdn.jsdelivr.net/npm/intl-tel-input@25/build/js/utils.js"
-      });
-  
-      form?.addEventListener("submit", () => {
-        phoneInput.value = iti.getNumber();
-      });
-    }
-  });
-  /* ==========================================================================
-   WEBFLOW NATIVE FORMS → HUBSPOT
-   DAUMUS — PAGE CONTACT FR / NL
+<script>
+/* ==========================================================================
+   DAUMUS CONTACT
+   WEBFLOW FR / NL → HUBSPOT
+   + INTL TEL INPUT
 ========================================================================== */
 
 window.addEventListener("load", function () {
   "use strict";
 
   /* ==========================================================================
-     CONFIGURATION
+     HUBSPOT CONFIG
   ========================================================================== */
 
   const HUBSPOT_PORTAL_ID = "26541958";
-
-  /*
-   * true  = affiche l'erreur technique HubSpot
-   * false = affiche uniquement le message public
-   */
   const DEBUG_MODE = true;
 
   const FORMS_CONFIG = [
@@ -44,142 +21,113 @@ window.addEventListener("load", function () {
       hubspotFormId: "ffaa5326-2360-4fba-af67-bde1daa5e345",
       language: "fr",
       loadingText: "Envoi en cours...",
-      publicErrorText:
+      errorText:
         "Une erreur est survenue. Merci de réessayer."
     },
+
     {
       selector: "#wf-form-Particulier-Form---Nl",
       hubspotFormId: "59b0a4c2-da5f-4005-8f5a-c71449f6667a",
       language: "nl",
       loadingText: "Bezig met verzenden...",
-      publicErrorText:
+      errorText:
         "Er is een fout opgetreden. Probeer het opnieuw."
     }
   ];
 
   /* ==========================================================================
-     FIELD HELPERS
+     INTL TEL INPUT
   ========================================================================== */
 
-  function findField(form, selectors) {
-    for (const selector of selectors) {
-      const field = form.querySelector(selector);
+  const phoneInstances = new WeakMap();
 
-      if (field) {
-        return field;
+  function initPhone(form) {
+    const input =
+      form.querySelector('input[type="tel"]');
+
+    if (!input) return;
+
+    if (input.dataset.itiInitialized === "true") {
+      return;
+    }
+
+    if (typeof window.intlTelInput !== "function") {
+      console.warn(
+        "intl-tel-input n'est pas chargé."
+      );
+      return;
+    }
+
+    const iti = window.intlTelInput(input, {
+      initialCountry: "be",
+
+      preferredCountries: [
+        "be",
+        "fr",
+        "ma",
+        "ch",
+        "es",
+        "ae",
+        "cn"
+      ],
+
+      separateDialCode: true,
+
+      nationalMode: true,
+
+      formatOnDisplay: true
+    });
+
+    input.dataset.itiInitialized = "true";
+
+    phoneInstances.set(input, iti);
+  }
+
+  function getInternationalPhone(form) {
+    const input =
+      form.querySelector('input[type="tel"]');
+
+    if (!input) return "";
+
+    const instance =
+      phoneInstances.get(input);
+
+    /*
+     * Première méthode :
+     * instance créée par ce script.
+     */
+    if (
+      instance &&
+      typeof instance.getNumber === "function"
+    ) {
+      const fullNumber = instance.getNumber();
+
+      if (fullNumber) {
+        return fullNumber;
       }
     }
 
-    return null;
-  }
-
-  function getFieldValue(form, selectors) {
-    const field = findField(form, selectors);
-
-    if (!field) {
-      return "";
-    }
-
-    return String(field.value || "").trim();
-  }
-
-  function addHubSpotField(fields, name, value) {
-    if (
-      !name ||
-      value === undefined ||
-      value === null
-    ) {
-      return;
-    }
-
-    const cleanValue = String(value).trim();
-
-    if (!cleanValue) {
-      return;
-    }
-
-    fields.push({
-      name: name,
-      value: cleanValue
-    });
-  }
-
-  /* ==========================================================================
-     HUBSPOT TRACKING COOKIE
-  ========================================================================== */
-
-  function getHubSpotCookie() {
-    const cookie = document.cookie
-      .split("; ")
-      .find(function (item) {
-        return item.startsWith("hubspotutk=");
-      });
-
-    return cookie
-      ? cookie.split("=")[1] || ""
-      : "";
-  }
-
-  /* ==========================================================================
-     PHONE — INTL TEL INPUT
-  ========================================================================== */
-
-  function getInternationalPhone(form) {
-    const phoneInput = findField(form, [
-      'input[name="Phone"]',
-      'input[name="phone"]',
-      ".iti input[type='tel']",
-      'input[type="tel"]'
-    ]);
-
-    if (!phoneInput) {
-      return "";
-    }
-
     /*
-     * intl-tel-input moderne.
+     * Si intl-tel-input avait déjà été
+     * initialisé ailleurs.
      */
     if (
       window.intlTelInput &&
       typeof window.intlTelInput.getInstance ===
         "function"
     ) {
-      const instance =
-        window.intlTelInput.getInstance(phoneInput);
+      const existing =
+        window.intlTelInput.getInstance(input);
 
       if (
-        instance &&
-        typeof instance.getNumber === "function"
+        existing &&
+        typeof existing.getNumber === "function"
       ) {
-        const number = instance.getNumber();
+        const fullNumber =
+          existing.getNumber();
 
-        if (number) {
-          return number;
-        }
-      }
-    }
-
-    /*
-     * Compatibilité avec certaines anciennes versions.
-     */
-    if (
-      window.intlTelInputGlobals &&
-      typeof window.intlTelInputGlobals
-        .getInstance === "function"
-    ) {
-      const instance =
-        window.intlTelInputGlobals.getInstance(
-          phoneInput
-        );
-
-      if (
-        instance &&
-        typeof instance.getNumber === "function"
-      ) {
-        const number = instance.getNumber();
-
-        if (number) {
-          return number;
+        if (fullNumber) {
+          return fullNumber;
         }
       }
     }
@@ -187,19 +135,19 @@ window.addEventListener("load", function () {
     /*
      * Fallback manuel.
      */
-    let number = String(phoneInput.value || "")
-      .trim()
-      .replace(/[^\d+]/g, "");
+    let number =
+      String(input.value || "")
+        .trim()
+        .replace(/[^\d+]/g, "");
 
-    if (!number) {
-      return "";
-    }
+    if (!number) return "";
 
     if (number.startsWith("+")) {
       return number;
     }
 
-    const itiWrapper = phoneInput.closest(".iti");
+    const itiWrapper =
+      input.closest(".iti");
 
     const dialCode =
       itiWrapper
@@ -209,96 +157,262 @@ window.addEventListener("load", function () {
         ?.textContent
         ?.trim() || "";
 
-    /*
-     * Exemple :
-     * 0470123456 + indicatif +32
-     * devient +32470123456
-     */
     number = number.replace(/^0+/, "");
 
     return `${dialCode}${number}`;
   }
 
   /* ==========================================================================
-     PRIVACY CHECKBOX
+     GENERIC FIELD HELPERS
   ========================================================================== */
 
-  function getPrivacyCheckbox(form) {
-    return findField(form, [
-      'input[name="politique"]',
-      'input[name="Politique"]',
-      "input#politique",
-      'input[type="checkbox"][required]'
-    ]);
+  function findField(form, selectors) {
+    for (const selector of selectors) {
+      const element =
+        form.querySelector(selector);
+
+      if (element) {
+        return element;
+      }
+    }
+
+    return null;
   }
 
-  function isPrivacyAccepted(form) {
-    const checkbox = getPrivacyCheckbox(form);
+  function getValue(form, selectors) {
+    const field =
+      findField(form, selectors);
 
-    return Boolean(
-      checkbox && checkbox.checked
-    );
+    if (!field) return "";
+
+    return String(
+      field.value || ""
+    ).trim();
+  }
+
+  function addHubSpotField(
+    fields,
+    name,
+    value
+  ) {
+    if (
+      !name ||
+      value === undefined ||
+      value === null
+    ) {
+      return;
+    }
+
+    const cleanValue =
+      String(value).trim();
+
+    if (!cleanValue) {
+      return;
+    }
+
+    fields.push({
+      name,
+      value: cleanValue
+    });
   }
 
   /* ==========================================================================
-     HUBSPOT FIELD MAPPING
+     CHECKBOX GROUPS
+  ========================================================================== */
+
+  /*
+   * Récupère les checkbox cochées situées
+   * dans un .form--item.
+   *
+   * On utilise data-name en priorité afin
+   * d'obtenir le texte propre.
+   */
+  function getCheckedValues(container) {
+    if (!container) {
+      return [];
+    }
+
+    return Array.from(
+      container.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      )
+    ).map(function (checkbox) {
+      return (
+        checkbox.dataset.name ||
+        checkbox.value ||
+        checkbox.name
+      ).trim();
+    });
+  }
+
+  /*
+   * Premier groupe :
+   * Où se situe votre problème ?
+  */
+  function getProblemValues(form) {
+    const title =
+      Array.from(
+        form.querySelectorAll(
+          ".form--item"
+        )
+      ).find(function (item) {
+        const label =
+          item.querySelector(
+            ".heading-style-18"
+          );
+
+        if (!label) return false;
+
+        const text =
+          label.textContent
+            .trim()
+            .toLowerCase();
+
+        return (
+          text.includes(
+            "où se situe"
+          ) ||
+          text.includes(
+            "waar bevindt"
+          )
+        );
+      });
+
+    return getCheckedValues(title);
+  }
+
+  /*
+   * Deuxième groupe :
+   * symptômes.
+  */
+  function getSymptomsValues(form) {
+    const title =
+      Array.from(
+        form.querySelectorAll(
+          ".form--item"
+        )
+      ).find(function (item) {
+        const label =
+          item.querySelector(
+            ".heading-style-18"
+          );
+
+        if (!label) return false;
+
+        const text =
+          label.textContent
+            .trim()
+            .toLowerCase();
+
+        return (
+          text.includes(
+            "symptômes"
+          ) ||
+          text.includes(
+            "symptomen"
+          )
+        );
+      });
+
+    return getCheckedValues(title);
+  }
+
+  /*
+   * HubSpot multiple checkbox utilise
+   * généralement des valeurs séparées
+   * par des points-virgules.
+  */
+  function formatCheckboxValues(values) {
+    return values.join(";");
+  }
+
+  /* ==========================================================================
+     HUBSPOT COOKIE
+  ========================================================================== */
+
+  function getHubSpotCookie() {
+    const cookie =
+      document.cookie
+        .split("; ")
+        .find(function (item) {
+          return item.startsWith(
+            "hubspotutk="
+          );
+        });
+
+    return cookie
+      ? cookie.split("=")[1] || ""
+      : "";
+  }
+
+  /* ==========================================================================
+     HUBSPOT MAPPING
   ========================================================================== */
 
   function buildHubSpotFields(form) {
     const fields = [];
 
     /*
-     * Où se situe votre problème ?
+     * PROBLÈME
      */
+    const problems =
+      getProblemValues(form);
+
     addHubSpotField(
       fields,
       "probleme",
-      getFieldValue(form, [
-        '[name="probleme"]',
-        "#probleme"
-      ])
+      formatCheckboxValues(problems)
     );
 
     /*
-     * Quels sont les symptômes rencontrés ?
+     * SYMPTÔMES
+     *
+     * Nom interne confirmé précédemment
+     * par HubSpot.
      */
+    const symptoms =
+      getSymptomsValues(form);
+
     addHubSpotField(
       fields,
       "quels_sont_les_symptomes_rencontres__",
-      getFieldValue(form, [
-        '[name="symptomes"]',
-        "#symptomes"
-      ])
+      formatCheckboxValues(symptoms)
     );
 
     /*
-     * Nom.
+     * NOM
+     *
+     * FR = Nom
+     * NL = Naam
      */
     addHubSpotField(
       fields,
       "lastname",
-      getFieldValue(form, [
+      getValue(form, [
         '[name="Nom"]',
-        '[name="lastname"]',
-        "#Nom"
+        '[name="Naam"]',
+        '[name="lastname"]'
       ])
     );
 
     /*
-     * Prénom.
+     * PRÉNOM
+     *
+     * FR = Pr-nom
+     * NL = Voornaam
      */
     addHubSpotField(
       fields,
       "firstname",
-      getFieldValue(form, [
+      getValue(form, [
         '[name="Pr-nom"]',
-        '[name="firstname"]',
-        "#Prenom"
+        '[name="Voornaam"]',
+        '[name="firstname"]'
       ])
     );
 
     /*
-     * Téléphone.
+     * PHONE
      */
     addHubSpotField(
       fields,
@@ -307,107 +421,77 @@ window.addEventListener("load", function () {
     );
 
     /*
-     * Email.
+     * EMAIL
      */
     addHubSpotField(
       fields,
       "email",
-      getFieldValue(form, [
-        'input[type="email"]',
+      getValue(form, [
+        '[name="Adresse-Mail"]',
+        '[name="E-mailadres"]',
         '[name="Email"]',
         '[name="email"]',
-        "#Email"
+        'input[type="email"]'
       ])
     );
 
     /*
-     * Adresse.
+     * ADRESSE COMPLÈTE
      */
     addHubSpotField(
       fields,
       "address",
-      getFieldValue(form, [
+      getValue(form, [
+        '[name="Adresse-Compl-te"]',
+        '[name="Volledig-adres"]',
         '[name="Adresse"]',
-        '[name="address"]',
-        "#Adresse"
+        '[name="address"]'
       ])
     );
 
     /*
-     * Numéro / boîte.
+     * CODE POSTAL
      *
-     * Nom interne exact HubSpot :
-     * n____boite
-     */
-    addHubSpotField(
-      fields,
-      "n____boite",
-      getFieldValue(form, [
-        '[name="Num-Boite"]',
-        '[name="Num-ro-Bo-te"]',
-        '[name="numero-boite"]',
-        '[name="numero_boite"]',
-        "#Num-Boite",
-        "#Numero-Boite"
-      ])
-    );
-
-    /*
-     * Ville.
-     */
-    addHubSpotField(
-      fields,
-      "city",
-      getFieldValue(form, [
-        '[name="Ville"]',
-        '[name="city"]',
-        "#Ville"
-      ])
-    );
-
-    /*
-     * Code postal.
-     *
-     * Nom interne exact HubSpot :
+     * Nom interne HubSpot confirmé :
      * code_postal
      */
     addHubSpotField(
       fields,
       "code_postal",
-      getFieldValue(form, [
+      getValue(form, [
         '[name="Code-postal"]',
-        '[name="code_postal"]',
-        '[name="zip"]',
-        "#Code-postal"
+        '[name="Postcode"]',
+        '[name="code_postal"]'
       ])
     );
 
     /*
-     * Message.
+     * VILLE
+     */
+    addHubSpotField(
+      fields,
+      "city",
+      getValue(form, [
+        '[name="Ville"]',
+        '[name="Stad"]',
+        '[name="city"]'
+      ])
+    );
+
+    /*
+     * MESSAGE
+     *
+     * FR = message
+     * NL = Uw-bericht
      */
     addHubSpotField(
       fields,
       "message",
-      getFieldValue(form, [
+      getValue(form, [
         '[name="message"]',
-        '[name="Message"]',
-        "textarea#message",
+        '[name="Uw-bericht"]',
         "textarea"
       ])
-    );
-
-    /*
-     * Politique de vie privée.
-     *
-     * Nom interne exact HubSpot :
-     * j_accepte_la_politique_de_vie_privee
-     */
-    addHubSpotField(
-      fields,
-      "j_accepte_la_politique_de_vie_privee",
-      isPrivacyAccepted(form)
-        ? "true"
-        : "false"
     );
 
     return fields;
@@ -415,11 +499,15 @@ window.addEventListener("load", function () {
 
   function buildHubSpotContext() {
     const context = {
-      pageUri: window.location.href,
-      pageName: document.title
+      pageUri:
+        window.location.href,
+
+      pageName:
+        document.title
     };
 
-    const hutk = getHubSpotCookie();
+    const hutk =
+      getHubSpotCookie();
 
     if (hutk) {
       context.hutk = hutk;
@@ -429,264 +517,227 @@ window.addEventListener("load", function () {
   }
 
   /* ==========================================================================
-     HUBSPOT ERROR PARSER
+     HUBSPOT ERROR
   ========================================================================== */
 
-  function getHubSpotErrorMessage(
-    responseData,
+  function parseHubSpotError(
+    data,
     status
   ) {
-    const messages = [];
-
     if (
-      responseData &&
-      Array.isArray(responseData.errors)
+      data &&
+      Array.isArray(data.errors)
     ) {
-      responseData.errors.forEach(
-        function (error) {
-          if (error.message) {
-            messages.push(error.message);
-            return;
-          }
-
-          if (error.errorType) {
-            messages.push(error.errorType);
-            return;
-          }
-
-          try {
-            messages.push(
-              JSON.stringify(error)
-            );
-          } catch (jsonError) {
-            messages.push(
-              "Erreur HubSpot non détaillée"
-            );
-          }
-        }
-      );
+      return data.errors
+        .map(function (error) {
+          return (
+            error.message ||
+            error.errorType ||
+            JSON.stringify(error)
+          );
+        })
+        .join(" | ");
     }
 
-    if (messages.length) {
-      return messages.join(" | ");
+    if (data?.message) {
+      return data.message;
     }
 
-    if (responseData?.message) {
-      return responseData.message;
+    if (data?.rawResponse) {
+      return data.rawResponse;
     }
 
-    if (responseData?.rawResponse) {
-      return responseData.rawResponse;
-    }
-
-    return `Erreur HubSpot ${status}`;
+    return `HubSpot error ${status}`;
   }
 
   /* ==========================================================================
-     SEND TO HUBSPOT
+     SEND
   ========================================================================== */
 
-  async function sendToHubSpot(form, config) {
+  async function sendToHubSpot(
+    form,
+    config
+  ) {
     const endpoint =
       "https://api.hsforms.com/submissions/v3/integration/submit/" +
       `${HUBSPOT_PORTAL_ID}/${config.hubspotFormId}`;
 
     const payload = {
       submittedAt: Date.now(),
-      fields: buildHubSpotFields(form),
-      context: buildHubSpotContext()
+
+      fields:
+        buildHubSpotFields(form),
+
+      context:
+        buildHubSpotContext()
     };
 
     console.group(
-      `HubSpot Contact — ${config.language.toUpperCase()}`
+      `HubSpot ${config.language.toUpperCase()}`
     );
 
-    console.log("Endpoint :", endpoint);
     console.log(
-      "HubSpot Form ID :",
+      "Form ID:",
       config.hubspotFormId
     );
-    console.log("Payload :", payload);
+
     console.log(
-      "Payload JSON :",
-      JSON.stringify(payload, null, 2)
+      "Payload:",
+      payload
     );
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/json;charset=UTF-8"
-      },
-      body: JSON.stringify(payload)
-    });
+    console.log(
+      JSON.stringify(
+        payload,
+        null,
+        2
+      )
+    );
+
+    const response =
+      await fetch(endpoint, {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json;charset=UTF-8"
+        },
+
+        body:
+          JSON.stringify(payload)
+      });
 
     const responseText =
       await response.text();
 
-    let responseData = null;
+    let data = null;
 
     if (responseText) {
       try {
-        responseData =
+        data =
           JSON.parse(responseText);
-      } catch (error) {
-        responseData = {
-          rawResponse: responseText
+      } catch {
+        data = {
+          rawResponse:
+            responseText
         };
       }
     }
 
     console.log(
-      "Statut HTTP :",
+      "HTTP:",
       response.status
     );
 
     console.log(
-      "Réponse HubSpot :",
-      responseData
+      "HubSpot response:",
+      data
     );
 
     console.groupEnd();
 
     if (!response.ok) {
-      const message =
-        getHubSpotErrorMessage(
-          responseData,
+      throw new Error(
+        parseHubSpotError(
+          data,
           response.status
-        );
-
-      const hubSpotError =
-        new Error(message);
-
-      hubSpotError.status =
-        response.status;
-
-      hubSpotError.response =
-        responseData;
-
-      hubSpotError.payload =
-        payload;
-
-      throw hubSpotError;
+        )
+      );
     }
 
-    return responseData;
+    return data;
   }
 
   /* ==========================================================================
-     WEBFLOW SUCCESS / ERROR
+     WEBFLOW UI
   ========================================================================== */
 
-  function getFormMessages(form) {
-    const formBlock =
+  function getMessages(form) {
+    const wrapper =
       form.closest(".w-form");
 
     return {
       success:
-        formBlock?.querySelector(
+        wrapper?.querySelector(
           ".w-form-done"
-        ) || null,
+        ),
 
       error:
-        formBlock?.querySelector(
+        wrapper?.querySelector(
           ".w-form-fail"
-        ) || null
+        )
     };
   }
 
   function hideMessages(form) {
     const messages =
-      getFormMessages(form);
+      getMessages(form);
 
     if (messages.success) {
       messages.success.style.display =
         "none";
-
-      messages.success.setAttribute(
-        "aria-hidden",
-        "true"
-      );
     }
 
     if (messages.error) {
       messages.error.style.display =
         "none";
-
-      messages.error.setAttribute(
-        "aria-hidden",
-        "true"
-      );
     }
   }
 
   function showSuccess(form) {
     const messages =
-      getFormMessages(form);
+      getMessages(form);
 
-    form.style.display = "none";
+    form.style.display =
+      "none";
 
     if (messages.error) {
       messages.error.style.display =
         "none";
-
-      messages.error.setAttribute(
-        "aria-hidden",
-        "true"
-      );
     }
 
     if (messages.success) {
       messages.success.style.display =
         "block";
 
-      messages.success.setAttribute(
-        "aria-hidden",
-        "false"
-      );
-
       messages.success.focus();
     }
   }
 
-  function showError(form, message) {
+  function showError(
+    form,
+    message
+  ) {
     const messages =
-      getFormMessages(form);
+      getMessages(form);
 
     form.style.display = "";
 
     if (messages.success) {
       messages.success.style.display =
         "none";
-
-      messages.success.setAttribute(
-        "aria-hidden",
-        "true"
-      );
     }
 
     if (messages.error) {
       const text =
-        messages.error.querySelector("div");
+        messages.error.querySelector(
+          "div"
+        );
 
       if (text) {
-        text.textContent = message;
+        text.textContent =
+          message;
       }
 
       messages.error.style.display =
         "block";
-
-      messages.error.setAttribute(
-        "aria-hidden",
-        "false"
-      );
 
       messages.error.focus();
     }
   }
 
   /* ==========================================================================
-     CUSTOM WEBFLOW BUTTON
+     CUSTOM BUTTON
   ========================================================================== */
 
   function getCustomButton(form) {
@@ -696,66 +747,64 @@ window.addEventListener("load", function () {
   }
 
   function getButtonText(button) {
-    if (!button) {
-      return null;
-    }
+    if (!button) return null;
 
-    return (
-      Array.from(button.children).find(
-        function (child) {
-          return !child.classList.contains(
-            "button-bg"
-          );
-        }
-      ) || null
-    );
+    return Array.from(
+      button.children
+    ).find(function (child) {
+      return !child.classList.contains(
+        "button-bg"
+      );
+    });
   }
 
   function setSubmittingState(
     form,
     config,
-    isSubmitting
+    loading
   ) {
     const nativeSubmit =
       form.querySelector(
-        'input[type="submit"]'
+        '[type="submit"]'
       );
 
     const customButton =
       getCustomButton(form);
 
-    const buttonText =
-      getButtonText(customButton);
+    const text =
+      getButtonText(
+        customButton
+      );
 
     if (nativeSubmit) {
       nativeSubmit.disabled =
-        isSubmitting;
+        loading;
     }
 
     if (customButton) {
       customButton.style.pointerEvents =
-        isSubmitting ? "none" : "";
+        loading ? "none" : "";
 
       customButton.setAttribute(
         "aria-disabled",
-        isSubmitting
+        loading
           ? "true"
           : "false"
       );
     }
 
-    if (buttonText) {
+    if (text) {
       if (
-        !buttonText.dataset.originalText
+        !text.dataset.originalText
       ) {
-        buttonText.dataset.originalText =
-          buttonText.textContent.trim();
+        text.dataset.originalText =
+          text.textContent.trim();
       }
 
-      buttonText.textContent =
-        isSubmitting
+      text.textContent =
+        loading
           ? config.loadingText
-          : buttonText.dataset.originalText;
+          : text.dataset.originalText;
     }
   }
 
@@ -772,15 +821,24 @@ window.addEventListener("load", function () {
 
       if (!form) {
         console.warn(
-          `Formulaire introuvable : ${config.selector}`
+          "Form not found:",
+          config.selector
         );
 
         return;
       }
 
+      /*
+       * Phone flags.
+       */
+      initPhone(form);
+
+      /*
+       * Empêche double initialisation.
+       */
       if (
-        form.dataset
-          .hubspotInitialized === "true"
+        form.dataset.hubspotInitialized ===
+        "true"
       ) {
         return;
       }
@@ -798,12 +856,11 @@ window.addEventListener("load", function () {
 
       const nativeSubmit =
         form.querySelector(
-          'input[type="submit"]'
+          '[type="submit"]'
         );
 
       /*
-       * Le bouton visuel Webflow est un lien.
-       * Il déclenche le véritable submit.
+       * Ton bouton visuel est un <a>.
        */
       if (customButton) {
         customButton.addEventListener(
@@ -823,18 +880,13 @@ window.addEventListener("load", function () {
               typeof form.requestSubmit ===
               "function"
             ) {
-              if (nativeSubmit) {
-                form.requestSubmit(
-                  nativeSubmit
-                );
-              } else {
-                form.requestSubmit();
-              }
-
-              return;
-            }
-
-            if (nativeSubmit) {
+              form.requestSubmit(
+                nativeSubmit ||
+                undefined
+              );
+            } else if (
+              nativeSubmit
+            ) {
               nativeSubmit.click();
             }
           }
@@ -842,7 +894,7 @@ window.addEventListener("load", function () {
       }
 
       /*
-       * Interception avant Webflow.
+       * SUBMIT
        */
       form.addEventListener(
         "submit",
@@ -862,7 +914,7 @@ window.addEventListener("load", function () {
           hideMessages(form);
 
           /*
-           * Validation HTML native.
+           * Validation native Webflow / HTML.
            */
           if (
             typeof form.reportValidity ===
@@ -872,43 +924,8 @@ window.addEventListener("load", function () {
             return;
           }
 
-          /*
-           * La politique doit être cochée.
-           */
-          if (
-            !isPrivacyAccepted(form)
-          ) {
-            const checkbox =
-              getPrivacyCheckbox(form);
-
-            if (checkbox) {
-              checkbox.setCustomValidity(
-                config.language === "nl"
-                  ? "Gelieve het privacybeleid te accepteren."
-                  : "Veuillez accepter la politique de confidentialité."
-              );
-
-              checkbox.reportValidity();
-
-              checkbox.addEventListener(
-                "change",
-                function clearError() {
-                  checkbox.setCustomValidity(
-                    ""
-                  );
-
-                  checkbox.removeEventListener(
-                    "change",
-                    clearError
-                  );
-                }
-              );
-            }
-
-            return;
-          }
-
-          form.dataset.hubspotSubmitting =
+          form.dataset
+            .hubspotSubmitting =
             "true";
 
           setSubmittingState(
@@ -924,28 +941,47 @@ window.addEventListener("load", function () {
             );
 
             console.log(
-              `Formulaire Contact ${config.language.toUpperCase()} envoyé à HubSpot.`
+              `✓ ${config.language.toUpperCase()} envoyé à HubSpot`
             );
 
             form.reset();
 
+            /*
+             * Reset intl-tel-input.
+             */
+            const phone =
+              form.querySelector(
+                'input[type="tel"]'
+              );
+
+            const iti =
+              phoneInstances.get(
+                phone
+              );
+
+            if (iti) {
+              iti.setCountry("be");
+            }
+
             showSuccess(form);
+
           } catch (error) {
+
             console.error(
-              `Erreur formulaire ${config.language.toUpperCase()} :`,
+              `HubSpot ${config.language.toUpperCase()}:`,
               error
             );
 
-            const visibleMessage =
-              DEBUG_MODE
-                ? `HubSpot : ${error.message}`
-                : config.publicErrorText;
-
             showError(
               form,
-              visibleMessage
+
+              DEBUG_MODE
+                ? `HubSpot : ${error.message}`
+                : config.errorText
             );
+
           } finally {
+
             form.dataset
               .hubspotSubmitting =
               "false";
@@ -961,4 +997,6 @@ window.addEventListener("load", function () {
       );
     }
   );
+
 });
+</script>
