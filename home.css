@@ -406,3 +406,44 @@
        min-width: 63vw;
      }
    }
+
+   /* ==========================================================================
+   SWIPERS — CORRECTION DES DIMENSIONS ET DE L’ALIGNEMENT
+   ========================================================================== */
+
+.swiper.is--advices,
+.swiper.is--testimonial {
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.swiper.is--advices > .swiper-wrapper,
+.swiper.is--testimonial > .swiper-wrapper {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+
+  /* L’espacement est géré par spaceBetween dans le JS */
+  gap: 0 !important;
+  column-gap: 0 !important;
+  row-gap: 0 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.swiper.is--advices > .swiper-wrapper > .swiper-slide,
+.swiper.is--testimonial > .swiper-wrapper > .swiper-slide {
+  box-sizing: border-box;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  flex-basis: auto !important;
+
+  /* Laisser Swiper définir la largeur en inline */
+  min-width: 0 !important;
+  max-width: none !important;
+
+  margin-left: 0 !important;
+}
