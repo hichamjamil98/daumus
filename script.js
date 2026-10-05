@@ -1440,3 +1440,73 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   
   });
+
+  /* ===============================
+   PHONE INPUT — NUMBERS ONLY
+   =============================== */
+
+   
+(() => {
+  'use strict';
+
+  const selector = 'input[type="tel"]';
+
+  // Remove non-digit characters and preserve the cursor position.
+  function sanitize(input) {
+    const value = input.value;
+    const position = input.selectionStart;
+    const digits = value.replace(/[^0-9]/g, '');
+
+    if (value === digits) return;
+
+    input.value = digits;
+
+    if (position !== null) {
+      const caret = value.slice(0, position).replace(/[^0-9]/g, '').length;
+      input.setSelectionRange(caret, caret);
+    }
+  }
+
+  // Block non-digit characters while typing.
+  document.addEventListener('beforeinput', (event) => {
+    if (
+      event.target.matches(selector) &&
+      event.inputType === 'insertText' &&
+      event.data &&
+      /[^0-9]/.test(event.data)
+    ) {
+      event.preventDefault();
+    }
+  }, true);
+
+  // Clean pasted content and mobile input.
+  document.addEventListener('input', (event) => {
+    if (event.target.matches(selector)) {
+      sanitize(event.target);
+    }
+  });
+
+  // Enable the numeric keyboard for existing and dynamically added fields.
+  function configureFields() {
+    document.querySelectorAll(selector).forEach((input) => {
+      input.setAttribute('inputmode', 'numeric');
+      input.setAttribute('pattern', '[0-9]*');
+      sanitize(input);
+    });
+  }
+
+  function initialize() {
+    configureFields();
+
+    new MutationObserver(configureFields).observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+  } else {
+    initialize();
+  }
+})();
