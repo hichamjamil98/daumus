@@ -1702,3 +1702,47 @@
     }
   
   })();
+
+  /* FAQ — synchronisation de aria-expanded */
+(function () {
+  "use strict";
+
+  function initFaqAria() {
+    document.querySelectorAll(".faq--item").forEach(function (item) {
+      const question = item.querySelector(".faq--question");
+      const answer = item.querySelector(".faq--answer");
+
+      if (!question || !answer) return;
+
+      function syncExpanded() {
+        // Suit le max-height utilisé par ton animation existante.
+        const maxHeight =
+          answer.style.maxHeight ||
+          window.getComputedStyle(answer).maxHeight;
+
+        const isExpanded =
+          maxHeight === "none" || parseFloat(maxHeight) > 0;
+
+        question.setAttribute(
+          "aria-expanded",
+          String(isExpanded)
+        );
+      }
+
+      syncExpanded();
+
+      const observer = new MutationObserver(syncExpanded);
+
+      observer.observe(answer, {
+        attributes: true,
+        attributeFilter: ["style", "class"]
+      });
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initFaqAria);
+  } else {
+    initFaqAria();
+  }
+})();
